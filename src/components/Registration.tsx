@@ -61,6 +61,8 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
     const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
     const code = `${firstName}-${domainClean}-${rand}`;
 
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
     const newPass: StaffPass = {
       id: Date.now().toString(),
       fullName,
@@ -68,6 +70,7 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
       photo,
       code,
       dateIssued: new Date().toISOString(),
+      expiresAt,
       status: "active",
       revokeReason: null,
     };

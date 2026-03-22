@@ -5,8 +5,24 @@ export interface StaffPass {
   photo: string;
   code: string;
   dateIssued: string;
+  expiresAt: string;
   status: 'active' | 'revoked';
   revokeReason: string | null;
+}
+
+export function isPassExpired(pass: StaffPass): boolean {
+  return new Date(pass.expiresAt).getTime() <= Date.now();
+}
+
+export function getTimeRemaining(pass: StaffPass): { hours: number; minutes: number; seconds: number; expired: boolean } {
+  const diff = new Date(pass.expiresAt).getTime() - Date.now();
+  if (diff <= 0) return { hours: 0, minutes: 0, seconds: 0, expired: true };
+  return {
+    hours: Math.floor(diff / (1000 * 60 * 60)),
+    minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+    seconds: Math.floor((diff % (1000 * 60)) / 1000),
+    expired: false,
+  };
 }
 
 export interface ActivityLogEntry {
