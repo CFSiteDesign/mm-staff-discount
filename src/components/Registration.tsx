@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { getDB, saveDB, logActivity, type StaffPass } from "@/lib/db";
+import { getDB, saveDB, logActivity, isPassExpired, type StaffPass } from "@/lib/db";
 import logo from "@/assets/mad-monkey-logo.png";
 
 interface RegistrationProps {
