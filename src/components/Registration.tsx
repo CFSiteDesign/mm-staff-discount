@@ -40,7 +40,7 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
     setEmailError("");
     setPhotoError("");
 
-    if (!photo) { setPhotoError("Photo is required"); return; }
+    if (!photo) { setPhotoError("A photo of your face is required"); return; }
 
     const domain = email.toLowerCase().split("@")[1];
     const db = getDB();
