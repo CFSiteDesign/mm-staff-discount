@@ -35,7 +35,18 @@ export function initDB(): void {
 }
 
 export function getDB(): AppDatabase {
-  return JSON.parse(localStorage.getItem(DB_KEY) || '{}');
+  const raw = localStorage.getItem(DB_KEY);
+  if (!raw) {
+    initDB();
+    return JSON.parse(localStorage.getItem(DB_KEY)!);
+  }
+  const parsed = JSON.parse(raw);
+  // Ensure all fields exist even if data was partially saved
+  return {
+    passes: Array.isArray(parsed.passes) ? parsed.passes : [],
+    approvedDomains: Array.isArray(parsed.approvedDomains) ? parsed.approvedDomains : DEFAULT_DOMAINS,
+    activityLog: Array.isArray(parsed.activityLog) ? parsed.activityLog : [],
+  };
 }
 
 export function saveDB(data: AppDatabase): void {
