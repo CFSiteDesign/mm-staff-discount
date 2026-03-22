@@ -104,8 +104,9 @@ export default function AdminDashboard({ onLogout }: Props) {
         <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
           {[
             { label: "Total Passes", value: total, color: "text-primary" },
-            { label: "Active Passes", value: active, color: "text-success" },
-            { label: "Revoked Passes", value: revoked, color: "text-destructive" },
+            { label: "Active", value: active, color: "text-success" },
+            { label: "Expired", value: expired, color: "text-muted-foreground" },
+            { label: "Revoked", value: revoked, color: "text-destructive" },
           ].map(s => (
             <Card key={s.label} className="shadow-card hover:shadow-pass transition-shadow duration-300">
               <CardContent className="pt-5">
