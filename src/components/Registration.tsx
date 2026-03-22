@@ -99,6 +99,7 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
             <h2 className="font-display text-xl font-bold text-center mb-5">Staff Discount Pass</h2>
             <form onSubmit={handleSubmit}>
               {/* Photo upload */}
+              <p className="text-center text-sm text-muted-foreground mb-2">Please upload a clear photo of your face</p>
               <motion.div
                 className="flex flex-col items-center mb-5"
                 initial={{ opacity: 0, scale: 0.9 }}
