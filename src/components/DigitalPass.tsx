@@ -105,6 +105,7 @@ export default function DigitalPass({ pass, onReset }: Props) {
           <Button size="lg" variant={timeLeft.expired ? "default" : "outline"} className={`w-full ${timeLeft.expired ? "" : "bg-card"}`} onClick={onReset}>
             Generate New Pass
           </Button>
+        </motion.div>
       </motion.div>
     </div>
   );
