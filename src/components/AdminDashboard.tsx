@@ -27,7 +27,7 @@ export default function AdminDashboard({ onLogout }: Props) {
       .filter(p => p.fullName.toLowerCase().includes(search.toLowerCase()) || p.code.toLowerCase().includes(search.toLowerCase()) || p.email.toLowerCase().includes(search.toLowerCase()))
       .sort((a, b) => new Date(b.dateIssued).getTime() - new Date(a.dateIssued).getTime()),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [search, total, active, revoked]
+    [search, total, active, expired, revoked]
   );
 
   const toggleStatus = (id: string, newStatus: "active" | "revoked") => {
