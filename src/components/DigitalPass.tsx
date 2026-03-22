@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getTimeRemaining, type StaffPass } from "@/lib/db";
-import { toast } from "sonner";
 import logo from "@/assets/mad-monkey-logo.png";
 
 interface Props {
@@ -12,11 +10,9 @@ interface Props {
 }
 
 export default function DigitalPass({ pass, onReset }: Props) {
-  const [showEmail, setShowEmail] = useState(false);
   const [timeLeft, setTimeLeft] = useState(getTimeRemaining(pass));
   const date = new Date(pass.dateIssued);
   const dateStr = date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-  const firstName = pass.fullName.split(" ")[0];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -24,11 +20,6 @@ export default function DigitalPass({ pass, onReset }: Props) {
     }, 1000);
     return () => clearInterval(interval);
   }, [pass]);
-
-  const sendEmail = () => {
-    setShowEmail(true);
-    toast.success(`Pass sent to ${pass.email}!`);
-  };
 
   return (
     <div className="flex min-h-screen items-center justify-center px-5 py-10 bg-primary">
@@ -111,34 +102,10 @@ export default function DigitalPass({ pass, onReset }: Props) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9, duration: 0.4 }}
         >
-          {!timeLeft.expired && <Button size="lg" className="w-full" onClick={sendEmail}>Send to My Email</Button>}
           <Button size="lg" variant={timeLeft.expired ? "default" : "outline"} className={`w-full ${timeLeft.expired ? "" : "bg-card"}`} onClick={onReset}>
-            {timeLeft.expired ? "Generate New Pass" : "Generate New Pass"}
+            Generate New Pass
           </Button>
         </motion.div>
-
-        {/* Email Preview Dialog */}
-        <Dialog open={showEmail} onOpenChange={setShowEmail}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle className="text-sm font-normal">
-                <strong>Subject:</strong> Your Mad Monkey 50% Discount Pass is Ready!
-                <br /><span className="text-muted-foreground text-xs">From: staff@madmonkeyhostels.com</span>
-              </DialogTitle>
-            </DialogHeader>
-            <div className="space-y-3 text-sm">
-              <img src={logo} alt="Mad Monkey" className="h-10 mx-auto" />
-              <p>Hi {firstName},</p>
-              <p>Your Mad Monkey Certified digital discount pass has been verified and is ready to use.</p>
-              <div className="bg-accent border-l-4 border-primary p-4 rounded">
-                <p><strong>UNIQUE CODE:</strong> <span className="font-mono font-bold">{pass.code}</span></p>
-                <p><strong>DISCOUNT:</strong> 50% Food & Beverage</p>
-              </div>
-              <p><strong>Instructions:</strong> Present the digital pass on your phone to any Mad Monkey staff member to receive your discount.</p>
-              <p className="italic text-muted-foreground">This pass is valid at all Mad Monkey locations worldwide.</p>
-            </div>
-          </DialogContent>
-        </Dialog>
       </motion.div>
     </div>
   );
