@@ -1,16 +1,49 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useCallback } from "react";
+import Registration from "@/components/Registration";
+import VerificationAnimation from "@/components/VerificationAnimation";
+import DigitalPass from "@/components/DigitalPass";
+import AdminLogin from "@/components/AdminLogin";
+import AdminDashboard from "@/components/AdminDashboard";
+import type { StaffPass } from "@/lib/db";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+type View = "register" | "verify" | "pass" | "admin-login" | "admin-dash";
+
+export default function Index() {
+  const [view, setView] = useState<View>("register");
+  const [currentPass, setCurrentPass] = useState<StaffPass | null>(null);
+
+  const handlePassCreated = (pass: StaffPass) => {
+    setCurrentPass(pass);
+    setView("verify");
+  };
+
+  const handleVerifyComplete = useCallback(() => {
+    setView("pass");
+  }, []);
+
+  const handleExistingPass = (pass: StaffPass) => {
+    setCurrentPass(pass);
+    setView("pass");
+  };
+
+  const handleReset = () => {
+    setCurrentPass(null);
+    setView("register");
+  };
+
+  const handleAdminLogin = () => {
+    setView("admin-dash");
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
-    </div>
+    <>
+      {view === "register" && (
+        <Registration onPassCreated={handlePassCreated} onExistingPass={handleExistingPass} onAdminClick={() => setView("admin-login")} />
+      )}
+      {view === "verify" && <VerificationAnimation onComplete={handleVerifyComplete} />}
+      {view === "pass" && currentPass && <DigitalPass pass={currentPass} onReset={handleReset} />}
+      {view === "admin-login" && <AdminLogin onLogin={handleAdminLogin} onBack={handleReset} />}
+      {view === "admin-dash" && <AdminDashboard onLogout={handleReset} />}
+    </>
   );
-};
-
-const Index = PlaceholderIndex;
-
-export default Index;
+}
