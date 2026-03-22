@@ -40,7 +40,7 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
     setEmailError("");
     setPhotoError("");
 
-    if (!photo) { setPhotoError("Photo is required"); return; }
+    if (!photo) { setPhotoError("A photo of your face is required"); return; }
 
     const domain = email.toLowerCase().split("@")[1];
     const db = getDB();
@@ -99,6 +99,7 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
             <h2 className="font-display text-xl font-bold text-center mb-5">Staff Discount Pass</h2>
             <form onSubmit={handleSubmit}>
               {/* Photo upload */}
+              <p className="text-center text-sm text-muted-foreground mb-2">Please upload a clear photo of your face</p>
               <motion.div
                 className="flex flex-col items-center mb-5"
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -117,7 +118,7 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
                 </div>
                 <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handlePhoto} />
                 <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
-                  Select Photo
+                  Upload Face Photo
                 </Button>
                 {photoError && <p className="text-destructive text-xs mt-1">{photoError}</p>}
               </motion.div>
