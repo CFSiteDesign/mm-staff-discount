@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import logo from "@/assets/mad-monkey-logo.png";
 
 const steps = [
   { id: 1, text: "Employee record found" },
@@ -30,12 +31,22 @@ export default function VerificationAnimation({ onComplete }: Props) {
   }, [onComplete]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-5">
-      <div className="w-full max-w-md">
-        <h1 className="font-display text-3xl font-black text-primary text-center mb-6 tracking-tight">
-          🐒 MAD MONKEY
-        </h1>
-        <Card className="shadow-card">
+    <div className="flex min-h-screen items-center justify-center px-5 bg-secondary">
+      <motion.div
+        className="w-full max-w-md"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <motion.img
+          src={logo}
+          alt="Mad Monkey"
+          className="h-14 mx-auto mb-6 invert"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
+        />
+        <Card className="shadow-pass">
           <CardContent className="pt-8 pb-8 text-center">
             <AnimatePresence mode="wait">
               {phase !== "success" ? (
@@ -91,7 +102,7 @@ export default function VerificationAnimation({ onComplete }: Props) {
             )}
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
     </div>
   );
 }

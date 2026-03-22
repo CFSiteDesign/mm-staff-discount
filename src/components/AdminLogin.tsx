@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
+import logo from "@/assets/mad-monkey-logo.png";
 
 interface Props {
   onLogin: () => void;
@@ -24,12 +26,22 @@ export default function AdminLogin({ onLogin, onBack }: Props) {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-5">
-      <div className="w-full max-w-md">
-        <h1 className="font-display text-3xl font-black text-primary text-center mb-6 tracking-tight">
-          🐒 MAD MONKEY
-        </h1>
-        <Card className="shadow-card">
+    <div className="flex min-h-screen items-center justify-center px-5 bg-secondary">
+      <motion.div
+        className="w-full max-w-md"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <motion.img
+          src={logo}
+          alt="Mad Monkey"
+          className="h-14 mx-auto mb-8 invert"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2, type: "spring" }}
+        />
+        <Card className="shadow-pass">
           <CardContent className="pt-6">
             <h2 className="font-display text-xl font-bold text-center mb-5">Admin Access</h2>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -43,7 +55,7 @@ export default function AdminLogin({ onLogin, onBack }: Props) {
             </form>
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
     </div>
   );
 }

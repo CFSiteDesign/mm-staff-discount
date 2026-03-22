@@ -1,8 +1,10 @@
 import { useState, useMemo } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { getDB, saveDB, logActivity } from "@/lib/db";
+import logo from "@/assets/mad-monkey-logo.png";
 
 interface Props {
   onLogout: () => void;
@@ -72,118 +74,137 @@ export default function AdminDashboard({ onLogout }: Props) {
     onLogout();
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
+  };
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
+  };
+
   return (
-    <div className="max-w-5xl mx-auto px-5 py-8">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-2xl font-black text-primary tracking-tight">🐒 ADMIN DASHBOARD</h1>
-        <Button variant="secondary" size="sm" onClick={handleLogout}>Logout</Button>
-      </div>
+    <div className="min-h-screen bg-secondary">
+      <motion.div
+        className="max-w-5xl mx-auto px-5 py-8"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div variants={itemVariants} className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <img src={logo} alt="Mad Monkey" className="h-8 invert" />
+            <h1 className="font-display text-xl font-black text-secondary-foreground tracking-tight">ADMIN</h1>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleLogout} className="bg-card">Logout</Button>
+        </motion.div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        {[
-          { label: "Total Passes", value: total, color: "text-primary" },
-          { label: "Active Passes", value: active, color: "text-success" },
-          { label: "Revoked Passes", value: revoked, color: "text-destructive" },
-        ].map(s => (
-          <Card key={s.label} className="shadow-card">
-            <CardContent className="pt-5">
-              <p className="text-muted-foreground text-sm">{s.label}</p>
-              <p className={`text-3xl font-bold font-display ${s.color}`}>{s.value}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+        {/* Stats */}
+        <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          {[
+            { label: "Total Passes", value: total, color: "text-primary" },
+            { label: "Active Passes", value: active, color: "text-success" },
+            { label: "Revoked Passes", value: revoked, color: "text-destructive" },
+          ].map(s => (
+            <Card key={s.label} className="shadow-card hover:shadow-pass transition-shadow duration-300">
+              <CardContent className="pt-5">
+                <p className="text-muted-foreground text-sm">{s.label}</p>
+                <p className={`text-3xl font-bold font-display ${s.color}`}>{s.value}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </motion.div>
 
-      <div className="flex flex-col lg:flex-row gap-5">
-        {/* Table */}
-        <div className="flex-[2] min-w-0">
-          <Card className="shadow-card overflow-hidden">
-            <div className="p-4 border-b flex items-center justify-between gap-3">
-              <h3 className="font-display font-bold">Pass Registry</h3>
-              <Input className="max-w-[200px]" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} />
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-accent">
-                    <th className="text-left p-3 font-semibold">Name</th>
-                    <th className="text-left p-3 font-semibold hidden sm:table-cell">Email</th>
-                    <th className="text-left p-3 font-semibold">Code</th>
-                    <th className="text-left p-3 font-semibold">Status</th>
-                    <th className="text-left p-3 font-semibold">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map(p => (
-                    <tr key={p.id} className="border-b last:border-0">
-                      <td className="p-3">
-                        <div className="flex items-center gap-2">
-                          <img src={p.photo} className="w-7 h-7 rounded-full object-cover" alt="" />
-                          <span className={p.status === "revoked" ? "line-through text-destructive" : ""}>{p.fullName}</span>
-                        </div>
-                      </td>
-                      <td className="p-3 hidden sm:table-cell text-muted-foreground">{p.email}</td>
-                      <td className="p-3 font-mono text-xs">{p.code}</td>
-                      <td className="p-3">
-                        <span className={p.status === "active" ? "text-success font-bold" : "text-destructive font-bold line-through"}>
-                          {p.status.toUpperCase()}
-                        </span>
-                      </td>
-                      <td className="p-3">
-                        {p.status === "active" ? (
-                          <Button size="sm" variant="destructive" className="text-xs h-7 px-2" onClick={() => toggleStatus(p.id, "revoked")}>Revoke</Button>
-                        ) : (
-                          <Button size="sm" variant="outline" className="text-xs h-7 px-2" onClick={() => toggleStatus(p.id, "active")}>Reactivate</Button>
-                        )}
-                      </td>
+        <div className="flex flex-col lg:flex-row gap-5">
+          {/* Table */}
+          <motion.div variants={itemVariants} className="flex-[2] min-w-0">
+            <Card className="shadow-card overflow-hidden">
+              <div className="p-4 border-b flex items-center justify-between gap-3">
+                <h3 className="font-display font-bold">Pass Registry</h3>
+                <Input className="max-w-[200px]" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} />
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-accent">
+                      <th className="text-left p-3 font-semibold">Name</th>
+                      <th className="text-left p-3 font-semibold hidden sm:table-cell">Email</th>
+                      <th className="text-left p-3 font-semibold">Code</th>
+                      <th className="text-left p-3 font-semibold">Status</th>
+                      <th className="text-left p-3 font-semibold">Action</th>
                     </tr>
+                  </thead>
+                  <tbody>
+                    {filtered.map(p => (
+                      <tr key={p.id} className="border-b last:border-0 hover:bg-accent/50 transition-colors">
+                        <td className="p-3">
+                          <div className="flex items-center gap-2">
+                            <img src={p.photo} className="w-7 h-7 rounded-full object-cover" alt="" />
+                            <span className={p.status === "revoked" ? "line-through text-destructive" : ""}>{p.fullName}</span>
+                          </div>
+                        </td>
+                        <td className="p-3 hidden sm:table-cell text-muted-foreground">{p.email}</td>
+                        <td className="p-3 font-mono text-xs">{p.code}</td>
+                        <td className="p-3">
+                          <span className={p.status === "active" ? "text-success font-bold" : "text-destructive font-bold line-through"}>
+                            {p.status.toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="p-3">
+                          {p.status === "active" ? (
+                            <Button size="sm" variant="destructive" className="text-xs h-7 px-2" onClick={() => toggleStatus(p.id, "revoked")}>Revoke</Button>
+                          ) : (
+                            <Button size="sm" variant="outline" className="text-xs h-7 px-2" onClick={() => toggleStatus(p.id, "active")}>Reactivate</Button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                    {filtered.length === 0 && (
+                      <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">No passes found</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          </motion.div>
+
+          {/* Sidebar */}
+          <motion.div variants={itemVariants} className="flex-1 min-w-[250px] space-y-5">
+            <Card className="shadow-card">
+              <CardContent className="pt-5">
+                <h3 className="font-display font-bold mb-4">Approved Domains</h3>
+                <div className="flex gap-2 mb-4">
+                  <Input placeholder="e.g. example.com" value={newDomain} onChange={e => setNewDomain(e.target.value)} />
+                  <Button size="sm" onClick={addDomain}>Add</Button>
+                </div>
+                <ul className="space-y-0">
+                  {db.approvedDomains.map(d => (
+                    <li key={d} className="flex items-center justify-between py-2 border-b last:border-0 text-sm">
+                      <span>@{d}</span>
+                      <button className="text-destructive text-xs hover:underline" onClick={() => removeDomain(d)}>Remove</button>
+                    </li>
                   ))}
-                  {filtered.length === 0 && (
-                    <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">No passes found</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-        </div>
+                </ul>
+              </CardContent>
+            </Card>
 
-        {/* Sidebar */}
-        <div className="flex-1 min-w-[250px] space-y-5">
-          <Card className="shadow-card">
-            <CardContent className="pt-5">
-              <h3 className="font-display font-bold mb-4">Approved Domains</h3>
-              <div className="flex gap-2 mb-4">
-                <Input placeholder="e.g. example.com" value={newDomain} onChange={e => setNewDomain(e.target.value)} />
-                <Button size="sm" onClick={addDomain}>Add</Button>
-              </div>
-              <ul className="space-y-0">
-                {db.approvedDomains.map(d => (
-                  <li key={d} className="flex items-center justify-between py-2 border-b last:border-0 text-sm">
-                    <span>@{d}</span>
-                    <button className="text-destructive text-xs hover:underline" onClick={() => removeDomain(d)}>Remove</button>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-card">
-            <CardContent className="pt-5">
-              <h3 className="font-display font-bold mb-4">Activity Log</h3>
-              <div className="max-h-72 overflow-y-auto space-y-2">
-                {db.activityLog.map((l, i) => (
-                  <div key={i} className="text-xs border-b pb-2 last:border-0">
-                    <p className="text-muted-foreground">{new Date(l.timestamp).toLocaleString()}</p>
-                    <p>{l.details}</p>
-                  </div>
-                ))}
-                {db.activityLog.length === 0 && <p className="text-muted-foreground text-xs">No activity yet</p>}
-              </div>
-            </CardContent>
-          </Card>
+            <Card className="shadow-card">
+              <CardContent className="pt-5">
+                <h3 className="font-display font-bold mb-4">Activity Log</h3>
+                <div className="max-h-72 overflow-y-auto space-y-2">
+                  {db.activityLog.map((l, i) => (
+                    <div key={i} className="text-xs border-b pb-2 last:border-0">
+                      <p className="text-muted-foreground">{new Date(l.timestamp).toLocaleString()}</p>
+                      <p>{l.details}</p>
+                    </div>
+                  ))}
+                  {db.activityLog.length === 0 && <p className="text-muted-foreground text-xs">No activity yet</p>}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

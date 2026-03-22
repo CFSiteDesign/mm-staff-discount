@@ -1,10 +1,12 @@
 import { useState, useRef } from "react";
+import { motion } from "framer-motion";
 import { Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { getDB, saveDB, logActivity, type StaffPass } from "@/lib/db";
+import logo from "@/assets/mad-monkey-logo.png";
 
 interface RegistrationProps {
   onPassCreated: (pass: StaffPass) => void;
@@ -77,19 +79,34 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-5 py-10">
-      <div className="w-full max-w-md">
-        <h1 className="font-display text-3xl font-black text-primary text-center mb-6 tracking-tight">
-          🐒 MAD MONKEY
-        </h1>
-        <Card className="shadow-card">
+    <div className="flex min-h-screen items-center justify-center px-5 py-10 bg-primary">
+      <motion.div
+        className="w-full max-w-md"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <motion.img
+          src={logo}
+          alt="Mad Monkey"
+          className="h-16 mx-auto mb-8"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.5, type: "spring" }}
+        />
+        <Card className="shadow-pass">
           <CardContent className="pt-6">
             <h2 className="font-display text-xl font-bold text-center mb-5">Staff Discount Pass</h2>
             <form onSubmit={handleSubmit}>
               {/* Photo upload */}
-              <div className="flex flex-col items-center mb-5">
+              <motion.div
+                className="flex flex-col items-center mb-5"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3, duration: 0.4 }}
+              >
                 <div
-                  className="w-28 h-28 rounded-full border-[3px] border-primary bg-muted flex items-center justify-center overflow-hidden mb-3 cursor-pointer"
+                  className="w-28 h-28 rounded-full border-[3px] border-primary bg-muted flex items-center justify-center overflow-hidden mb-3 cursor-pointer transition-transform duration-200 hover:scale-105"
                   onClick={() => fileRef.current?.click()}
                 >
                   {photo ? (
@@ -103,9 +120,14 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
                   Select Photo
                 </Button>
                 {photoError && <p className="text-destructive text-xs mt-1">{photoError}</p>}
-              </div>
+              </motion.div>
 
-              <div className="space-y-4">
+              <motion.div
+                className="space-y-4"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4, duration: 0.4 }}
+              >
                 <div>
                   <Label>Full Name</Label>
                   <Input value={fullName} onChange={e => setFullName(e.target.value)} placeholder="e.g. Sarah Jones" required />
@@ -116,16 +138,16 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
                   {emailError && <p className="text-destructive text-xs mt-1">{emailError}</p>}
                 </div>
                 <Button type="submit" className="w-full" size="lg">Verify & Generate Pass</Button>
-              </div>
+              </motion.div>
             </form>
           </CardContent>
         </Card>
         <p className="text-center mt-8">
-          <button onClick={onAdminClick} className="text-muted-foreground text-xs hover:text-primary transition-colors">
+          <button onClick={onAdminClick} className="text-primary-foreground/70 text-xs hover:text-primary-foreground transition-colors">
             Admin Login
           </button>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 }
