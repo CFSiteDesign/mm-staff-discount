@@ -65,14 +65,34 @@ export default function DigitalPass({ pass, onReset }: Props) {
           <h2 className="font-display text-2xl font-black uppercase mb-1">{pass.fullName}</h2>
           <p className="text-muted-foreground text-sm mb-6">{pass.email}</p>
 
-          <motion.div
-            className="bg-primary text-primary-foreground py-4 px-5 rounded-lg text-xl font-black -rotate-2 shadow-primary-glow mb-6"
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.8, type: "spring" }}
-          >
-            50% FOOD & BEVERAGE
-          </motion.div>
+          {timeLeft.expired ? (
+            <motion.div
+              className="bg-destructive/10 border-2 border-destructive text-destructive py-4 px-5 rounded-lg text-lg font-black mb-6"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+            >
+              PASS EXPIRED
+            </motion.div>
+          ) : (
+            <motion.div
+              className="bg-primary text-primary-foreground py-4 px-5 rounded-lg text-xl font-black -rotate-2 shadow-primary-glow mb-6"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.8, type: "spring" }}
+            >
+              50% FOOD & BEVERAGE
+            </motion.div>
+          )}
+
+          {/* Countdown timer */}
+          <div className={`rounded-lg p-3 mb-4 text-center ${timeLeft.expired ? "bg-destructive/10" : "bg-accent"}`}>
+            <p className="text-xs text-muted-foreground mb-1">TIME REMAINING</p>
+            <p className={`font-mono text-2xl font-bold tracking-wider ${timeLeft.expired ? "text-destructive" : ""}`}>
+              {timeLeft.expired
+                ? "00:00:00"
+                : `${String(timeLeft.hours).padStart(2, "0")}:${String(timeLeft.minutes).padStart(2, "0")}:${String(timeLeft.seconds).padStart(2, "0")}`}
+            </p>
+          </div>
 
           <div className="border-2 border-dashed border-border rounded-lg p-3 mb-4">
             <p className="text-xs text-muted-foreground mb-1">UNIQUE VERIFICATION CODE</p>
