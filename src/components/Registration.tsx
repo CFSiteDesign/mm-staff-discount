@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { getDB, saveDB, logActivity, type StaffPass } from "@/lib/db";
+import { getDB, saveDB, logActivity, isPassExpired, type StaffPass } from "@/lib/db";
 import logo from "@/assets/mad-monkey-logo.png";
 
 interface RegistrationProps {
@@ -50,7 +50,7 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
       return;
     }
 
-    const existing = db.passes.find(p => p.email === email.toLowerCase() && p.status === "active");
+    const existing = db.passes.find(p => p.email === email.toLowerCase() && p.status === "active" && !isPassExpired(p));
     if (existing) {
       onExistingPass(existing);
       return;
@@ -61,6 +61,8 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
     const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
     const code = `${firstName}-${domainClean}-${rand}`;
 
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
     const newPass: StaffPass = {
       id: Date.now().toString(),
       fullName,
@@ -68,6 +70,7 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
       photo,
       code,
       dateIssued: new Date().toISOString(),
+      expiresAt,
       status: "active",
       revokeReason: null,
     };

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { getDB, saveDB, logActivity } from "@/lib/db";
+import { getDB, saveDB, logActivity, isPassExpired } from "@/lib/db";
 import logo from "@/assets/mad-monkey-logo.png";
 
 interface Props {
@@ -18,7 +18,8 @@ export default function AdminDashboard({ onLogout }: Props) {
 
   const db = getDB();
   const total = db.passes.length;
-  const active = db.passes.filter(p => p.status === "active").length;
+  const active = db.passes.filter(p => p.status === "active" && !isPassExpired(p)).length;
+  const expired = db.passes.filter(p => p.status === "active" && isPassExpired(p)).length;
   const revoked = db.passes.filter(p => p.status === "revoked").length;
 
   const filtered = useMemo(() =>
@@ -26,7 +27,7 @@ export default function AdminDashboard({ onLogout }: Props) {
       .filter(p => p.fullName.toLowerCase().includes(search.toLowerCase()) || p.code.toLowerCase().includes(search.toLowerCase()) || p.email.toLowerCase().includes(search.toLowerCase()))
       .sort((a, b) => new Date(b.dateIssued).getTime() - new Date(a.dateIssued).getTime()),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [search, total, active, revoked]
+    [search, total, active, expired, revoked]
   );
 
   const toggleStatus = (id: string, newStatus: "active" | "revoked") => {
@@ -100,11 +101,12 @@ export default function AdminDashboard({ onLogout }: Props) {
         </motion.div>
 
         {/* Stats */}
-        <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <motion.div variants={itemVariants} className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           {[
             { label: "Total Passes", value: total, color: "text-primary" },
-            { label: "Active Passes", value: active, color: "text-success" },
-            { label: "Revoked Passes", value: revoked, color: "text-destructive" },
+            { label: "Active", value: active, color: "text-success" },
+            { label: "Expired", value: expired, color: "text-muted-foreground" },
+            { label: "Revoked", value: revoked, color: "text-destructive" },
           ].map(s => (
             <Card key={s.label} className="shadow-card hover:shadow-pass transition-shadow duration-300">
               <CardContent className="pt-5">
@@ -146,9 +148,13 @@ export default function AdminDashboard({ onLogout }: Props) {
                         <td className="p-3 hidden sm:table-cell text-muted-foreground">{p.email}</td>
                         <td className="p-3 font-mono text-xs">{p.code}</td>
                         <td className="p-3">
-                          <span className={p.status === "active" ? "text-success font-bold" : "text-destructive font-bold line-through"}>
-                            {p.status.toUpperCase()}
-                          </span>
+                          {p.status === "revoked" ? (
+                            <span className="text-destructive font-bold line-through">REVOKED</span>
+                          ) : isPassExpired(p) ? (
+                            <span className="text-muted-foreground font-bold">EXPIRED</span>
+                          ) : (
+                            <span className="text-success font-bold">ACTIVE</span>
+                          )}
                         </td>
                         <td className="p-3">
                           {p.status === "active" ? (
