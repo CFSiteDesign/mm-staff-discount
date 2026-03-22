@@ -1,9 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getTimeRemaining, type StaffPass } from "@/lib/db";
-import { toast } from "sonner";
 import logo from "@/assets/mad-monkey-logo.png";
 
 interface Props {
@@ -12,11 +10,9 @@ interface Props {
 }
 
 export default function DigitalPass({ pass, onReset }: Props) {
-  const [showEmail, setShowEmail] = useState(false);
   const [timeLeft, setTimeLeft] = useState(getTimeRemaining(pass));
   const date = new Date(pass.dateIssued);
   const dateStr = date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-  const firstName = pass.fullName.split(" ")[0];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -24,11 +20,6 @@ export default function DigitalPass({ pass, onReset }: Props) {
     }, 1000);
     return () => clearInterval(interval);
   }, [pass]);
-
-  const sendEmail = () => {
-    setShowEmail(true);
-    toast.success(`Pass sent to ${pass.email}!`);
-  };
 
   return (
     <div className="flex min-h-screen items-center justify-center px-5 py-10 bg-primary">
