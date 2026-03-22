@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { getDB, saveDB, logActivity } from "@/lib/db";
+import { getDB, saveDB, logActivity, isPassExpired } from "@/lib/db";
 import logo from "@/assets/mad-monkey-logo.png";
 
 interface Props {
