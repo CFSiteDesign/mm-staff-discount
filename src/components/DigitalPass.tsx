@@ -96,16 +96,7 @@ export default function DigitalPass({ pass, onReset }: Props) {
           </p>
         </motion.div>
 
-        <motion.div
-          className="flex flex-col gap-3"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.4 }}
-        >
-          <Button size="lg" variant={timeLeft.expired ? "default" : "outline"} className={`w-full ${timeLeft.expired ? "" : "bg-card"}`} onClick={onReset}>
-            Generate New Pass
-          </Button>
-        </motion.div>
+
       </motion.div>
     </div>
   );
