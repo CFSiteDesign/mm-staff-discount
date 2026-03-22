@@ -148,9 +148,13 @@ export default function AdminDashboard({ onLogout }: Props) {
                         <td className="p-3 hidden sm:table-cell text-muted-foreground">{p.email}</td>
                         <td className="p-3 font-mono text-xs">{p.code}</td>
                         <td className="p-3">
-                          <span className={p.status === "active" ? "text-success font-bold" : "text-destructive font-bold line-through"}>
-                            {p.status.toUpperCase()}
-                          </span>
+                          {p.status === "revoked" ? (
+                            <span className="text-destructive font-bold line-through">REVOKED</span>
+                          ) : isPassExpired(p) ? (
+                            <span className="text-muted-foreground font-bold">EXPIRED</span>
+                          ) : (
+                            <span className="text-success font-bold">ACTIVE</span>
+                          )}
                         </td>
                         <td className="p-3">
                           {p.status === "active" ? (
