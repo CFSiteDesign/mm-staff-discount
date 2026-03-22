@@ -101,7 +101,7 @@ export default function AdminDashboard({ onLogout }: Props) {
         </motion.div>
 
         {/* Stats */}
-        <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <motion.div variants={itemVariants} className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
           {[
             { label: "Total Passes", value: total, color: "text-primary" },
             { label: "Active", value: active, color: "text-success" },
