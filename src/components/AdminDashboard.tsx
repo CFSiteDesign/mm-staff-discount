@@ -18,7 +18,8 @@ export default function AdminDashboard({ onLogout }: Props) {
 
   const db = getDB();
   const total = db.passes.length;
-  const active = db.passes.filter(p => p.status === "active").length;
+  const active = db.passes.filter(p => p.status === "active" && !isPassExpired(p)).length;
+  const expired = db.passes.filter(p => p.status === "active" && isPassExpired(p)).length;
   const revoked = db.passes.filter(p => p.status === "revoked").length;
 
   const filtered = useMemo(() =>
