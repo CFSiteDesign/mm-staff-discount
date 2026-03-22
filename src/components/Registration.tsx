@@ -117,7 +117,7 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
                 </div>
                 <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handlePhoto} />
                 <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
-                  Select Photo
+                  Upload Face Photo
                 </Button>
                 {photoError && <p className="text-destructive text-xs mt-1">{photoError}</p>}
               </motion.div>
