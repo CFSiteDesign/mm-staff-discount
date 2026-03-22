@@ -100,7 +100,8 @@ export default function DigitalPass({ pass, onReset }: Props) {
           </div>
 
           <p className="text-xs text-muted-foreground">
-            Issued: {dateStr}<br />Valid at all Mad Monkey locations worldwide
+            Issued: {dateStr} · Expires: {new Date(pass.expiresAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+            <br />Valid at all Mad Monkey locations worldwide
           </p>
         </motion.div>
 
