@@ -111,8 +111,10 @@ export default function DigitalPass({ pass, onReset }: Props) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.9, duration: 0.4 }}
         >
-          <Button size="lg" className="w-full" onClick={sendEmail}>Send to My Email</Button>
-          <Button size="lg" variant="outline" className="w-full bg-card" onClick={onReset}>Generate New Pass</Button>
+          {!timeLeft.expired && <Button size="lg" className="w-full" onClick={sendEmail}>Send to My Email</Button>}
+          <Button size="lg" variant={timeLeft.expired ? "default" : "outline"} className={`w-full ${timeLeft.expired ? "" : "bg-card"}`} onClick={onReset}>
+            {timeLeft.expired ? "Generate New Pass" : "Generate New Pass"}
+          </Button>
         </motion.div>
 
         {/* Email Preview Dialog */}
