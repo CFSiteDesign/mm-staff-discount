@@ -50,7 +50,7 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
       return;
     }
 
-    const existing = db.passes.find(p => p.email === email.toLowerCase() && p.status === "active");
+    const existing = db.passes.find(p => p.email === email.toLowerCase() && p.status === "active" && !isPassExpired(p));
     if (existing) {
       onExistingPass(existing);
       return;
