@@ -180,11 +180,6 @@ export default function Registration({ onPassCreated, onExistingPass }: Registra
             </form>
           </CardContent>
         </Card>
-        <p className="text-center mt-8">
-          <a href="/admin" className="text-primary-foreground/70 text-xs hover:text-primary-foreground transition-colors">
-            Admin Login
-          </a>
-        </p>
       </motion.div>
     </div>
   );
