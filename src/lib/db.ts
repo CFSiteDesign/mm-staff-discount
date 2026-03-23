@@ -61,12 +61,19 @@ const DEFAULT_DOMAINS = [
 ];
 
 export function initDB(): void {
-  // Clear passes and activity log, keep approved domains synced
-  localStorage.setItem(DB_KEY, JSON.stringify({
-    passes: [],
-    approvedDomains: DEFAULT_DOMAINS,
-    activityLog: [],
-  }));
+  const raw = localStorage.getItem(DB_KEY);
+  if (raw) {
+    // Preserve existing data, just sync approved domains
+    const parsed = JSON.parse(raw);
+    parsed.approvedDomains = [...DEFAULT_DOMAINS];
+    localStorage.setItem(DB_KEY, JSON.stringify(parsed));
+  } else {
+    localStorage.setItem(DB_KEY, JSON.stringify({
+      passes: [],
+      approvedDomains: DEFAULT_DOMAINS,
+      activityLog: [],
+    }));
+  }
 }
 
 export function getDB(): AppDatabase {
@@ -76,7 +83,6 @@ export function getDB(): AppDatabase {
     return JSON.parse(localStorage.getItem(DB_KEY)!);
   }
   const parsed = JSON.parse(raw);
-  // Ensure all fields exist even if data was partially saved
   return {
     passes: Array.isArray(parsed.passes) ? parsed.passes : [],
     approvedDomains: Array.isArray(parsed.approvedDomains) ? parsed.approvedDomains : DEFAULT_DOMAINS,
