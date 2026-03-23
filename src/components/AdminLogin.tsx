@@ -17,7 +17,7 @@ export default function AdminLogin({ onLogin, onBack }: Props) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (pwd === "password") {
+    if (pwd === "111111") {
       sessionStorage.setItem("adminAuth", "true");
       onLogin();
     } else {
