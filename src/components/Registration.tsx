@@ -181,9 +181,9 @@ export default function Registration({ onPassCreated, onExistingPass }: Registra
           </CardContent>
         </Card>
         <p className="text-center mt-8">
-          <button onClick={onAdminClick} className="text-primary-foreground/70 text-xs hover:text-primary-foreground transition-colors">
+          <a href="/admin" className="text-primary-foreground/70 text-xs hover:text-primary-foreground transition-colors">
             Admin Login
-          </button>
+          </a>
         </p>
       </motion.div>
     </div>

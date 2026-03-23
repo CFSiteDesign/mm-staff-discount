@@ -29,19 +29,13 @@ export default function Index() {
     setView("register");
   };
 
-  const handleAdminLogin = () => {
-    setView("admin-dash");
-  };
-
   return (
     <>
       {view === "register" && (
-        <Registration onPassCreated={handlePassCreated} onExistingPass={handleExistingPass} onAdminClick={() => setView("admin-login")} />
+        <Registration onPassCreated={handlePassCreated} onExistingPass={handleExistingPass} />
       )}
       {view === "verify" && <VerificationAnimation onComplete={handleVerifyComplete} />}
       {view === "pass" && currentPass && <DigitalPass pass={currentPass} onReset={handleReset} />}
-      {view === "admin-login" && <AdminLogin onLogin={handleAdminLogin} onBack={handleReset} />}
-      {view === "admin-dash" && <AdminDashboard onLogout={handleReset} />}
     </>
   );
 }
