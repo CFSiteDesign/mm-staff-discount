@@ -79,6 +79,12 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
     db.passes.push(newPass);
     saveDB(db);
     logActivity("pass_issued", `Pass issued to ${fullName} (${email})`);
+
+    // Send notification email via Resend
+    supabase.functions.invoke('send-pass-email', {
+      body: { fullName, email: email.toLowerCase(), code, expiresAt },
+    }).catch(err => console.error('Email send failed:', err));
+
     onPassCreated(newPass);
   };
 
