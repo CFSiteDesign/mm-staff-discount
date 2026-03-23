@@ -61,19 +61,12 @@ const DEFAULT_DOMAINS = [
 ];
 
 export function initDB(): void {
-  const raw = localStorage.getItem(DB_KEY);
-  if (!raw) {
-    localStorage.setItem(DB_KEY, JSON.stringify({
-      passes: [],
-      approvedDomains: DEFAULT_DOMAINS,
-      activityLog: [],
-    }));
-  } else {
-    // Always sync approved domains to the canonical list
-    const parsed = JSON.parse(raw);
-    parsed.approvedDomains = [...DEFAULT_DOMAINS];
-    localStorage.setItem(DB_KEY, JSON.stringify(parsed));
-  }
+  // Clear passes and activity log, keep approved domains synced
+  localStorage.setItem(DB_KEY, JSON.stringify({
+    passes: [],
+    approvedDomains: DEFAULT_DOMAINS,
+    activityLog: [],
+  }));
 }
 
 export function getDB(): AppDatabase {
