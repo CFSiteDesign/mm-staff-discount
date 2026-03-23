@@ -10,7 +10,10 @@ interface Props {
 export default function DigitalPass({ pass, onReset }: Props) {
   const date = new Date(pass.dateIssued);
   const dateStr = date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-  const isExpired = new Date(pass.expiresAt) < new Date();
+  const now = new Date();
+  const expiry = new Date(pass.expiresAt);
+  const isExpired = expiry < now;
+  const monthsLeft = isExpired ? 0 : Math.max(0, Math.ceil((expiry.getTime() - now.getTime()) / (30.44 * 24 * 60 * 60 * 1000)));
 
   return (
     <div className="flex min-h-screen items-center justify-center px-5 py-10 bg-primary">
@@ -69,7 +72,7 @@ export default function DigitalPass({ pass, onReset }: Props) {
           {/* Valid for 1 year badge */}
           <div className={`rounded-lg p-3 mb-4 text-center ${isExpired ? "bg-destructive/10" : "bg-accent"}`}>
             <p className={`font-bold text-sm ${isExpired ? "text-destructive" : ""}`}>
-              {isExpired ? "EXPIRED" : "✓ VALID FOR 1 YEAR"}
+              {isExpired ? "EXPIRED" : `✓ ${monthsLeft} MONTH${monthsLeft !== 1 ? "S" : ""} REMAINING`}
             </p>
           </div>
 
