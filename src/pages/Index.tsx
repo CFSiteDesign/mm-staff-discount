@@ -2,11 +2,9 @@ import { useState, useCallback } from "react";
 import Registration from "@/components/Registration";
 import VerificationAnimation from "@/components/VerificationAnimation";
 import DigitalPass from "@/components/DigitalPass";
-import AdminLogin from "@/components/AdminLogin";
-import AdminDashboard from "@/components/AdminDashboard";
 import type { StaffPass } from "@/lib/db";
 
-type View = "register" | "verify" | "pass" | "admin-login" | "admin-dash";
+type View = "register" | "verify" | "pass";
 
 export default function Index() {
   const [view, setView] = useState<View>("register");
