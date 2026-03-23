@@ -36,7 +36,7 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
     reader.readAsDataURL(file);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setEmailError("");
     setPhotoError("");
@@ -64,6 +64,26 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
 
     const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
 
+    // Upload photo to storage and get public URL
+    let photoUrl = "";
+    try {
+      const base64Data = photo.split(",")[1];
+      const mimeType = photo.split(";")[0].split(":")[1];
+      const ext = mimeType.includes("png") ? "png" : mimeType.includes("webp") ? "webp" : "jpg";
+      const byteArray = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+      const fileName = `${code.toLowerCase()}.${ext}`;
+
+      await supabase.storage.from("pass-photos").upload(fileName, byteArray, {
+        contentType: mimeType,
+        upsert: true,
+      });
+
+      const { data: urlData } = supabase.storage.from("pass-photos").getPublicUrl(fileName);
+      photoUrl = urlData.publicUrl;
+    } catch (err) {
+      console.error("Photo upload failed:", err);
+    }
+
     const newPass: StaffPass = {
       id: Date.now().toString(),
       fullName,
@@ -80,9 +100,9 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
     saveDB(db);
     logActivity("pass_issued", `Pass issued to ${fullName} (${email})`);
 
-    // Send notification email via Resend
+    // Send notification email with public photo URL
     supabase.functions.invoke('send-pass-email', {
-      body: { fullName, email: email.toLowerCase(), code, expiresAt, photo },
+      body: { fullName, email: email.toLowerCase(), code, expiresAt, photo: photoUrl },
     }).catch(err => console.error('Email send failed:', err));
 
     onPassCreated(newPass);
