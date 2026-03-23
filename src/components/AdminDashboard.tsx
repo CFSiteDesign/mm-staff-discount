@@ -180,19 +180,30 @@ export default function AdminDashboard({ onLogout }: Props) {
           <motion.div variants={itemVariants} className="flex-1 min-w-[250px] space-y-5">
             <Card className="shadow-card">
               <CardContent className="pt-5">
-                <h3 className="font-display font-bold mb-4">Approved Domains</h3>
-                <div className="flex gap-2 mb-4">
-                  <Input placeholder="e.g. example.com" value={newDomain} onChange={e => setNewDomain(e.target.value)} />
-                  <Button size="sm" onClick={addDomain}>Add</Button>
-                </div>
-                <ul className="space-y-0">
-                  {db.approvedDomains.map(d => (
-                    <li key={d} className="flex items-center justify-between py-2 border-b last:border-0 text-sm">
-                      <span>@{d}</span>
-                      <button className="text-destructive text-xs hover:underline" onClick={() => removeDomain(d)}>Remove</button>
-                    </li>
-                  ))}
-                </ul>
+                <button
+                  type="button"
+                  className="flex items-center justify-between w-full"
+                  onClick={() => setDomainsOpen(o => !o)}
+                >
+                  <h3 className="font-display font-bold">Approved Domains ({db.approvedDomains.length})</h3>
+                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${domainsOpen ? "rotate-180" : ""}`} />
+                </button>
+                {domainsOpen && (
+                  <div className="mt-4">
+                    <div className="flex gap-2 mb-4">
+                      <Input placeholder="e.g. example.com" value={newDomain} onChange={e => setNewDomain(e.target.value)} />
+                      <Button size="sm" onClick={addDomain}>Add</Button>
+                    </div>
+                    <ul className="space-y-0 max-h-60 overflow-y-auto">
+                      {db.approvedDomains.map(d => (
+                        <li key={d} className="flex items-center justify-between py-2 border-b last:border-0 text-sm">
+                          <span>@{d}</span>
+                          <button className="text-destructive text-xs hover:underline" onClick={() => removeDomain(d)}>Remove</button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
