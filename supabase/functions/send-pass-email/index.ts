@@ -29,32 +29,31 @@ serve(async (req) => {
       year: 'numeric', month: 'long', day: 'numeric',
     });
 
+    const firstName = fullName.split(' ')[0];
+
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden;">
         <div style="background: #E85D2A; padding: 30px; text-align: center;">
           <h1 style="color: #ffffff; margin: 0; font-size: 24px;">🐒 Mad Monkey Staff Discount</h1>
-          <p style="color: #ffffff; opacity: 0.9; margin: 8px 0 0;">New Pass Issued</p>
+          <p style="color: #ffffff; opacity: 0.9; margin: 8px 0 0;">Your Digital Pass</p>
         </div>
         <div style="padding: 30px;">
-          <p style="color: #333; font-size: 16px; margin: 0 0 20px;">A new staff discount pass has been issued:</p>
+          <p style="color: #333; font-size: 16px; margin: 0 0 20px;">Hey ${firstName}! 👋 Your staff discount pass is ready.</p>
+          <div style="background: #FFF5F0; border: 2px solid #E85D2A; border-radius: 10px; padding: 20px; text-align: center; margin: 0 0 20px;">
+            <p style="color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px;">Your Pass Code</p>
+            <p style="color: #E85D2A; font-size: 24px; font-weight: bold; font-family: monospace; margin: 0;">${code}</p>
+          </div>
           <table style="width: 100%; border-collapse: collapse;">
             <tr>
               <td style="padding: 10px 0; color: #666; font-size: 14px; border-bottom: 1px solid #eee;">Name</td>
               <td style="padding: 10px 0; color: #333; font-size: 14px; font-weight: bold; border-bottom: 1px solid #eee; text-align: right;">${fullName}</td>
             </tr>
             <tr>
-              <td style="padding: 10px 0; color: #666; font-size: 14px; border-bottom: 1px solid #eee;">Email</td>
-              <td style="padding: 10px 0; color: #333; font-size: 14px; font-weight: bold; border-bottom: 1px solid #eee; text-align: right;">${email}</td>
-            </tr>
-            <tr>
-              <td style="padding: 10px 0; color: #666; font-size: 14px; border-bottom: 1px solid #eee;">Pass Code</td>
-              <td style="padding: 10px 0; color: #E85D2A; font-size: 14px; font-weight: bold; border-bottom: 1px solid #eee; text-align: right; font-family: monospace;">${code}</td>
-            </tr>
-            <tr>
-              <td style="padding: 10px 0; color: #666; font-size: 14px;">Expires</td>
-              <td style="padding: 10px 0; color: #333; font-size: 14px; font-weight: bold; text-align: right;">${expiryDate}</td>
+              <td style="padding: 10px 0; color: #666; font-size: 14px; border-bottom: 1px solid #eee;">Valid Until</td>
+              <td style="padding: 10px 0; color: #333; font-size: 14px; font-weight: bold; border-bottom: 1px solid #eee; text-align: right;">${expiryDate}</td>
             </tr>
           </table>
+          <p style="color: #999; font-size: 13px; margin: 20px 0 0; line-height: 1.5;">Show this email or your digital pass at any Mad Monkey location to receive your staff discount.</p>
         </div>
         <div style="background: #f9f9f9; padding: 20px; text-align: center;">
           <p style="color: #999; font-size: 12px; margin: 0;">Powered by TheoroX</p>
@@ -70,8 +69,8 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: 'Mad Monkey <madmonkey@theorox.com>',
-        to: ['theo@theorox.com'],
-        subject: `New Staff Pass: ${fullName} (${code})`,
+        to: [email],
+        subject: `Your Mad Monkey Staff Discount Pass 🐒`,
         html: htmlContent,
       }),
     });
