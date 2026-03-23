@@ -68,7 +68,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Mad Monkey <madmonkey@theorox.com>',
+        from: 'Mad Monkey <madmonkey@verify.theorox.com>',
         to: [email],
         subject: `Your Mad Monkey Staff Discount Pass 🐒`,
         html: htmlContent,
