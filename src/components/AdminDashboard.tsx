@@ -37,8 +37,9 @@ export default function AdminDashboard({ onLogout }: Props) {
     const data = getDB();
     const pass = data.passes.find(p => p.id === id);
     if (!pass) return;
+    let reason: string | null = null;
     if (newStatus === "revoked") {
-      const reason = prompt("Enter reason for revocation:");
+      reason = prompt("Enter reason for revocation:");
       if (reason === null) return;
       pass.revokeReason = reason;
     } else {
@@ -47,6 +48,13 @@ export default function AdminDashboard({ onLogout }: Props) {
     pass.status = newStatus;
     saveDB(data);
     logActivity(`pass_${newStatus}`, `Pass for ${pass.fullName} was ${newStatus}.`);
+
+    if (newStatus === "revoked") {
+      supabase.functions.invoke('send-pass-email', {
+        body: { fullName: pass.fullName, email: pass.email, code: pass.code, type: 'revoked', reason },
+      }).catch(err => console.error('Revocation email failed:', err));
+    }
+
     refresh();
   };
 
