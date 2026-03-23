@@ -26,74 +26,45 @@ serve(async (req) => {
     }
 
     const firstName = fullName.split(' ')[0];
-    const photoHtml = photo ? `<img src="${photo}" alt="${fullName}" style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid #E8432E; object-fit: cover; display: block; margin: 0 auto 16px;" />` : '';
     let subject: string;
     let htmlContent: string;
 
     if (type === 'revoked') {
-      subject = `Your Mad Monkey Staff Discount Pass Has Been Revoked`;
-      htmlContent = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden;">
-          <div style="background: #E8432E; padding: 30px; text-align: center;">
-            <img src="https://mm-staff-discount.lovable.app/images/mad-monkey-email-logo.png" alt="Mad Monkey" style="height: 50px; margin-bottom: 12px;" />
-            <p style="color: #ffffff; opacity: 0.9; margin: 0; font-size: 14px;">Staff Discount Pass</p>
-          </div>
-          <div style="padding: 30px; text-align: center;">
-            ${photoHtml}
-            <p style="color: #333; font-size: 16px; margin: 0 0 20px;">Hi ${firstName},</p>
-            <p style="color: #333; font-size: 15px; margin: 0 0 20px;">Your staff discount pass <strong style="font-family: monospace;">${code}</strong> has been <span style="color: #E8432E; font-weight: bold;">revoked</span>.</p>
-            ${reason ? `<div style="background: #FFF5F0; border-left: 4px solid #E8432E; padding: 15px; margin: 0 0 20px; border-radius: 4px; text-align: left;"><p style="color: #666; font-size: 13px; margin: 0;"><strong>Reason:</strong> ${reason}</p></div>` : ''}
-            <p style="color: #666; font-size: 14px; margin: 0 0 20px; line-height: 1.5;">This pass is no longer valid. If you believe this is an error, please contact your manager.</p>
-          </div>
-          <div style="background: #f9f9f9; padding: 20px; text-align: center;">
-            <p style="color: #999; font-size: 12px; margin: 0;">Powered by TheoroX</p>
-          </div>
-        </div>
-      `;
+      subject = `Mad Monkey – Pass Revoked`;
+      htmlContent = `<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #eee;">
+<div style="background:#E8432E;padding:20px;text-align:center;">
+<img src="https://mm-staff-discount.lovable.app/images/mad-monkey-email-logo.png" alt="Mad Monkey" style="height:40px;" />
+</div>
+<div style="padding:24px;text-align:center;">
+${photo ? `<img src="${photo}" alt="" width="90" height="90" style="border-radius:50%;border:3px solid #E8432E;object-fit:cover;display:block;margin:0 auto 12px;" />` : ''}
+<p style="margin:0 0 12px;color:#333;font-size:15px;">Hi ${firstName}, your pass <strong>${code}</strong> has been <span style="color:#E8432E;font-weight:bold;">revoked</span>.</p>
+${reason ? `<p style="background:#FFF5F0;padding:10px;border-radius:6px;color:#666;font-size:13px;margin:0 0 12px;"><strong>Reason:</strong> ${reason}</p>` : ''}
+<p style="color:#999;font-size:12px;margin:0;">Contact your manager if you believe this is an error.</p>
+</div>
+<div style="background:#f9f9f9;padding:12px;text-align:center;"><p style="color:#bbb;font-size:11px;margin:0;">Powered by TheoroX</p></div>
+</div>`;
     } else {
-      const expiryDate = new Date(expiresAt).toLocaleDateString('en-AU', {
-        year: 'numeric', month: 'long', day: 'numeric',
-      });
-      const issuedDate = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      const expiryDate = new Date(expiresAt).toLocaleDateString('en-AU', { year: 'numeric', month: 'long', day: 'numeric' });
       subject = `Your Mad Monkey Staff Discount Pass 🐒`;
-      htmlContent = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden;">
-          <div style="background: #E8432E; padding: 30px; text-align: center;">
-            <img src="https://mm-staff-discount.lovable.app/images/mad-monkey-email-logo.png" alt="Mad Monkey" style="height: 50px; margin-bottom: 12px;" />
-            <p style="color: #ffffff; opacity: 0.9; margin: 0; font-size: 14px;">Staff Discount Pass</p>
-          </div>
-          <div style="padding: 30px; text-align: center; border-top: 6px solid #F5A623;">
-            <div style="display: inline-block; background: #F5A623; color: #ffffff; font-size: 11px; font-weight: bold; letter-spacing: 2px; padding: 6px 14px; border-radius: 20px; margin: 0 0 20px;">CERTIFIED STAFF</div>
-            <br/>
-            ${photoHtml}
-            <h2 style="font-size: 22px; font-weight: 900; text-transform: uppercase; margin: 0 0 4px; color: #333;">${fullName}</h2>
-            <p style="color: #999; font-size: 13px; margin: 0 0 20px;">${email}</p>
-            <div style="background: #E8432E; color: #ffffff; padding: 16px 20px; border-radius: 10px; font-size: 20px; font-weight: 900; margin: 0 0 20px;">50% FOOD & BEVERAGE</div>
-            <div style="background: #FFF5F0; border: 2px solid #E85D2A; border-radius: 10px; padding: 16px; margin: 0 0 20px;">
-              <p style="color: #666; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 6px;">UNIQUE VERIFICATION CODE</p>
-              <p style="color: #E85D2A; font-size: 22px; font-weight: bold; font-family: monospace; margin: 0;">${code}</p>
-            </div>
-            <table style="width: 100%; border-collapse: collapse; margin: 0 0 16px;">
-              <tr>
-                <td style="padding: 10px 0; color: #666; font-size: 14px; border-bottom: 1px solid #eee; text-align: left;">Name</td>
-                <td style="padding: 10px 0; color: #333; font-size: 14px; font-weight: bold; border-bottom: 1px solid #eee; text-align: right;">${fullName}</td>
-              </tr>
-              <tr>
-                <td style="padding: 10px 0; color: #666; font-size: 14px; border-bottom: 1px solid #eee; text-align: left;">Valid Until</td>
-                <td style="padding: 10px 0; color: #333; font-size: 14px; font-weight: bold; border-bottom: 1px solid #eee; text-align: right;">${expiryDate}</td>
-              </tr>
-              <tr>
-                <td style="padding: 10px 0; color: #666; font-size: 14px; text-align: left;">Issued</td>
-                <td style="padding: 10px 0; color: #333; font-size: 14px; font-weight: bold; text-align: right;">${issuedDate}</td>
-              </tr>
-            </table>
-            <p style="color: #999; font-size: 12px; margin: 0; line-height: 1.5;">Show this email or your digital pass at any Mad Monkey location worldwide to receive your staff discount.</p>
-          </div>
-          <div style="background: #f9f9f9; padding: 20px; text-align: center;">
-            <p style="color: #999; font-size: 12px; margin: 0;">Powered by TheoroX</p>
-          </div>
-        </div>
-      `;
+      htmlContent = `<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #eee;">
+<div style="background:#E8432E;padding:20px;text-align:center;">
+<img src="https://mm-staff-discount.lovable.app/images/mad-monkey-email-logo.png" alt="Mad Monkey" style="height:40px;" />
+</div>
+<div style="padding:24px;text-align:center;border-top:5px solid #F5A623;">
+<span style="display:inline-block;background:#F5A623;color:#fff;font-size:10px;font-weight:bold;letter-spacing:2px;padding:5px 12px;border-radius:20px;">CERTIFIED STAFF</span>
+${photo ? `<br/><img src="${photo}" alt="" width="100" height="100" style="border-radius:50%;border:3px solid #E8432E;object-fit:cover;display:block;margin:12px auto;" />` : '<br/>'}
+<p style="font-size:18px;font-weight:900;text-transform:uppercase;margin:4px 0 2px;color:#333;">${fullName}</p>
+<p style="color:#999;font-size:12px;margin:0 0 16px;">${email}</p>
+<div style="background:#E8432E;color:#fff;padding:14px;border-radius:8px;font-size:18px;font-weight:900;margin:0 0 16px;">50% FOOD & BEVERAGE</div>
+<div style="background:#FFF5F0;border:2px solid #E85D2A;border-radius:8px;padding:12px;margin:0 0 16px;">
+<p style="color:#888;font-size:10px;text-transform:uppercase;letter-spacing:1px;margin:0 0 4px;">VERIFICATION CODE</p>
+<p style="color:#E85D2A;font-size:20px;font-weight:bold;font-family:monospace;margin:0;">${code}</p>
+</div>
+<p style="color:#666;font-size:13px;margin:0 0 4px;"><strong>Valid Until:</strong> ${expiryDate}</p>
+<p style="color:#999;font-size:11px;margin:12px 0 0;">Show at any Mad Monkey location for your staff discount.</p>
+</div>
+<div style="background:#f9f9f9;padding:12px;text-align:center;"><p style="color:#bbb;font-size:11px;margin:0;">Powered by TheoroX</p></div>
+</div>`;
     }
 
     const res = await fetch('https://api.resend.com/emails', {
