@@ -72,7 +72,7 @@ export default function DigitalPass({ pass, onReset }: Props) {
           {/* Valid for 1 year badge */}
           <div className={`rounded-lg p-3 mb-4 text-center ${isExpired ? "bg-destructive/10" : "bg-accent"}`}>
             <p className={`font-bold text-sm ${isExpired ? "text-destructive" : ""}`}>
-              {isExpired ? "EXPIRED" : "✓ VALID FOR 1 YEAR"}
+              {isExpired ? "EXPIRED" : `✓ ${monthsLeft} MONTH${monthsLeft !== 1 ? "S" : ""} REMAINING`}
             </p>
           </div>
 
