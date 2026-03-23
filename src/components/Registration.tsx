@@ -12,10 +12,9 @@ import logo from "@/assets/mad-monkey-logo.png";
 interface RegistrationProps {
   onPassCreated: (pass: StaffPass) => void;
   onExistingPass: (pass: StaffPass) => void;
-  onAdminClick: () => void;
 }
 
-export default function Registration({ onPassCreated, onExistingPass, onAdminClick }: RegistrationProps) {
+export default function Registration({ onPassCreated, onExistingPass }: RegistrationProps) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
