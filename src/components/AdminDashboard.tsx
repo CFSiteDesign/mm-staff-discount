@@ -14,6 +14,7 @@ interface Props {
 export default function AdminDashboard({ onLogout }: Props) {
   const [search, setSearch] = useState("");
   const [newDomain, setNewDomain] = useState("");
+  const [domainsOpen, setDomainsOpen] = useState(false);
   const [, forceUpdate] = useState(0);
   const refresh = () => forceUpdate(n => n + 1);
 
