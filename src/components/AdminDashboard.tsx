@@ -87,7 +87,7 @@ export default function AdminDashboard({ onLogout }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-secondary">
+    <div className="min-h-screen bg-secondary pb-20">
       <motion.div
         className="max-w-5xl mx-auto px-5 py-8"
         variants={containerVariants}

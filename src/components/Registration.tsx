@@ -89,7 +89,7 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-5 py-10 bg-primary">
+    <div className="flex min-h-screen items-center justify-center px-5 py-10 pb-20 bg-primary">
       <motion.div
         className="w-full max-w-md"
         initial={{ opacity: 0, y: 30 }}
