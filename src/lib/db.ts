@@ -61,12 +61,22 @@ const DEFAULT_DOMAINS = [
 ];
 
 export function initDB(): void {
-  if (!localStorage.getItem(DB_KEY)) {
+  const raw = localStorage.getItem(DB_KEY);
+  if (!raw) {
     localStorage.setItem(DB_KEY, JSON.stringify({
       passes: [],
       approvedDomains: DEFAULT_DOMAINS,
       activityLog: [],
     }));
+  } else {
+    // Sync: ensure all default domains are present
+    const parsed = JSON.parse(raw);
+    const current: string[] = Array.isArray(parsed.approvedDomains) ? parsed.approvedDomains : [];
+    const merged = [...new Set([...current, ...DEFAULT_DOMAINS])];
+    if (merged.length !== current.length) {
+      parsed.approvedDomains = merged;
+      localStorage.setItem(DB_KEY, JSON.stringify(parsed));
+    }
   }
 }
 
