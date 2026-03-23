@@ -14,7 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activity_log: {
+        Row: {
+          action: string
+          details: string
+          id: number
+          timestamp: string
+        }
+        Insert: {
+          action: string
+          details: string
+          id?: never
+          timestamp?: string
+        }
+        Update: {
+          action?: string
+          details?: string
+          id?: never
+          timestamp?: string
+        }
+        Relationships: []
+      }
+      staff_passes: {
+        Row: {
+          code: string
+          created_at: string
+          date_issued: string
+          email: string
+          expires_at: string
+          full_name: string
+          id: string
+          photo: string | null
+          photo_url: string | null
+          revoke_reason: string | null
+          status: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          date_issued?: string
+          email: string
+          expires_at: string
+          full_name: string
+          id: string
+          photo?: string | null
+          photo_url?: string | null
+          revoke_reason?: string | null
+          status?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          date_issued?: string
+          email?: string
+          expires_at?: string
+          full_name?: string
+          id?: string
+          photo?: string | null
+          photo_url?: string | null
+          revoke_reason?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
