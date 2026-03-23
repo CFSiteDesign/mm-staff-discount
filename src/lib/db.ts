@@ -69,14 +69,10 @@ export function initDB(): void {
       activityLog: [],
     }));
   } else {
-    // Sync: ensure all default domains are present
+    // Always sync approved domains to the canonical list
     const parsed = JSON.parse(raw);
-    const current: string[] = Array.isArray(parsed.approvedDomains) ? parsed.approvedDomains : [];
-    const merged = [...new Set([...current, ...DEFAULT_DOMAINS])];
-    if (merged.length !== current.length) {
-      parsed.approvedDomains = merged;
-      localStorage.setItem(DB_KEY, JSON.stringify(parsed));
-    }
+    parsed.approvedDomains = [...DEFAULT_DOMAINS];
+    localStorage.setItem(DB_KEY, JSON.stringify(parsed));
   }
 }
 
