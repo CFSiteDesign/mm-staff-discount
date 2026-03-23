@@ -51,7 +51,7 @@ export default function AdminDashboard({ onLogout }: Props) {
 
     if (newStatus === "revoked") {
       supabase.functions.invoke('send-pass-email', {
-        body: { fullName: pass.fullName, email: pass.email, code: pass.code, type: 'revoked', reason },
+        body: { fullName: pass.fullName, email: pass.email, code: pass.code, type: 'revoked', reason, photo: pass.photo },
       }).catch(err => console.error('Revocation email failed:', err));
     }
 
