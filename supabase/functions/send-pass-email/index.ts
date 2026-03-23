@@ -33,9 +33,9 @@ serve(async (req) => {
 
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden;">
-        <div style="background: #E85D2A; padding: 30px; text-align: center;">
-          <h1 style="color: #ffffff; margin: 0; font-size: 24px;">🐒 Mad Monkey Staff Discount</h1>
-          <p style="color: #ffffff; opacity: 0.9; margin: 8px 0 0;">Your Digital Pass</p>
+        <div style="background: #E8432E; padding: 30px; text-align: center;">
+          <img src="https://mm-staff-discount.lovable.app/images/mad-monkey-email-logo.png" alt="Mad Monkey" style="height: 50px; margin-bottom: 12px;" />
+          <p style="color: #ffffff; opacity: 0.9; margin: 0; font-size: 14px;">Staff Discount Pass</p>
         </div>
         <div style="padding: 30px;">
           <p style="color: #333; font-size: 16px; margin: 0 0 20px;">Hey ${firstName}! 👋 Your staff discount pass is ready.</p>
