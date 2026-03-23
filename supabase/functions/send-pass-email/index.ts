@@ -16,7 +16,7 @@ serve(async (req) => {
       throw new Error('RESEND_API_KEY is not configured');
     }
 
-    const { fullName, email, code, expiresAt } = await req.json();
+    const { fullName, email, code, expiresAt, type, reason } = await req.json();
 
     if (!fullName || !email || !code) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
@@ -25,41 +25,64 @@ serve(async (req) => {
       });
     }
 
-    const expiryDate = new Date(expiresAt).toLocaleDateString('en-AU', {
-      year: 'numeric', month: 'long', day: 'numeric',
-    });
-
     const firstName = fullName.split(' ')[0];
+    let subject: string;
+    let htmlContent: string;
 
-    const htmlContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden;">
-        <div style="background: #E8432E; padding: 30px; text-align: center;">
-          <img src="https://mm-staff-discount.lovable.app/images/mad-monkey-email-logo.png" alt="Mad Monkey" style="height: 50px; margin-bottom: 12px;" />
-          <p style="color: #ffffff; opacity: 0.9; margin: 0; font-size: 14px;">Staff Discount Pass</p>
-        </div>
-        <div style="padding: 30px;">
-          <p style="color: #333; font-size: 16px; margin: 0 0 20px;">Hey ${firstName}! 👋 Your staff discount pass is ready.</p>
-          <div style="background: #FFF5F0; border: 2px solid #E85D2A; border-radius: 10px; padding: 20px; text-align: center; margin: 0 0 20px;">
-            <p style="color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px;">Your Pass Code</p>
-            <p style="color: #E85D2A; font-size: 24px; font-weight: bold; font-family: monospace; margin: 0;">${code}</p>
+    if (type === 'revoked') {
+      subject = `Your Mad Monkey Staff Discount Pass Has Been Revoked`;
+      htmlContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden;">
+          <div style="background: #E8432E; padding: 30px; text-align: center;">
+            <img src="https://mm-staff-discount.lovable.app/images/mad-monkey-email-logo.png" alt="Mad Monkey" style="height: 50px; margin-bottom: 12px;" />
+            <p style="color: #ffffff; opacity: 0.9; margin: 0; font-size: 14px;">Staff Discount Pass</p>
           </div>
-          <table style="width: 100%; border-collapse: collapse;">
-            <tr>
-              <td style="padding: 10px 0; color: #666; font-size: 14px; border-bottom: 1px solid #eee;">Name</td>
-              <td style="padding: 10px 0; color: #333; font-size: 14px; font-weight: bold; border-bottom: 1px solid #eee; text-align: right;">${fullName}</td>
-            </tr>
-            <tr>
-              <td style="padding: 10px 0; color: #666; font-size: 14px; border-bottom: 1px solid #eee;">Valid Until</td>
-              <td style="padding: 10px 0; color: #333; font-size: 14px; font-weight: bold; border-bottom: 1px solid #eee; text-align: right;">${expiryDate}</td>
-            </tr>
-          </table>
-          <p style="color: #999; font-size: 13px; margin: 20px 0 0; line-height: 1.5;">Show this email or your digital pass at any Mad Monkey location to receive your staff discount.</p>
+          <div style="padding: 30px;">
+            <p style="color: #333; font-size: 16px; margin: 0 0 20px;">Hi ${firstName},</p>
+            <p style="color: #333; font-size: 15px; margin: 0 0 20px;">Your staff discount pass <strong style="font-family: monospace;">${code}</strong> has been <span style="color: #E8432E; font-weight: bold;">revoked</span>.</p>
+            ${reason ? `<div style="background: #FFF5F0; border-left: 4px solid #E8432E; padding: 15px; margin: 0 0 20px; border-radius: 4px;"><p style="color: #666; font-size: 13px; margin: 0;"><strong>Reason:</strong> ${reason}</p></div>` : ''}
+            <p style="color: #666; font-size: 14px; margin: 0 0 20px; line-height: 1.5;">This pass is no longer valid and cannot be used at Mad Monkey locations. If you believe this is an error, please contact your manager.</p>
+          </div>
+          <div style="background: #f9f9f9; padding: 20px; text-align: center;">
+            <p style="color: #999; font-size: 12px; margin: 0;">Powered by TheoroX</p>
+          </div>
         </div>
-        <div style="background: #f9f9f9; padding: 20px; text-align: center;">
-          <p style="color: #999; font-size: 12px; margin: 0;">Powered by TheoroX</p>
+      `;
+    } else {
+      const expiryDate = new Date(expiresAt).toLocaleDateString('en-AU', {
+        year: 'numeric', month: 'long', day: 'numeric',
+      });
+      subject = `Your Mad Monkey Staff Discount Pass 🐒`;
+      htmlContent = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden;">
+          <div style="background: #E8432E; padding: 30px; text-align: center;">
+            <img src="https://mm-staff-discount.lovable.app/images/mad-monkey-email-logo.png" alt="Mad Monkey" style="height: 50px; margin-bottom: 12px;" />
+            <p style="color: #ffffff; opacity: 0.9; margin: 0; font-size: 14px;">Staff Discount Pass</p>
+          </div>
+          <div style="padding: 30px;">
+            <p style="color: #333; font-size: 16px; margin: 0 0 20px;">Hey ${firstName}! 👋 Your staff discount pass is ready.</p>
+            <div style="background: #FFF5F0; border: 2px solid #E85D2A; border-radius: 10px; padding: 20px; text-align: center; margin: 0 0 20px;">
+              <p style="color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px;">Your Pass Code</p>
+              <p style="color: #E85D2A; font-size: 24px; font-weight: bold; font-family: monospace; margin: 0;">${code}</p>
+            </div>
+            <table style="width: 100%; border-collapse: collapse;">
+              <tr>
+                <td style="padding: 10px 0; color: #666; font-size: 14px; border-bottom: 1px solid #eee;">Name</td>
+                <td style="padding: 10px 0; color: #333; font-size: 14px; font-weight: bold; border-bottom: 1px solid #eee; text-align: right;">${fullName}</td>
+              </tr>
+              <tr>
+                <td style="padding: 10px 0; color: #666; font-size: 14px; border-bottom: 1px solid #eee;">Valid Until</td>
+                <td style="padding: 10px 0; color: #333; font-size: 14px; font-weight: bold; border-bottom: 1px solid #eee; text-align: right;">${expiryDate}</td>
+              </tr>
+            </table>
+            <p style="color: #999; font-size: 13px; margin: 20px 0 0; line-height: 1.5;">Show this email or your digital pass at any Mad Monkey location to receive your staff discount.</p>
+          </div>
+          <div style="background: #f9f9f9; padding: 20px; text-align: center;">
+            <p style="color: #999; font-size: 12px; margin: 0;">Powered by TheoroX</p>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    }
 
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -70,7 +93,7 @@ serve(async (req) => {
       body: JSON.stringify({
         from: 'Mad Monkey <madmonkey@verify.theorox.com>',
         to: [email],
-        subject: `Your Mad Monkey Staff Discount Pass 🐒`,
+        subject,
         html: htmlContent,
       }),
     });
