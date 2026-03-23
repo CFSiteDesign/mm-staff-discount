@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { getDB, saveDB, logActivity, isPassExpired } from "@/lib/db";
+import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/mad-monkey-logo.png";
 
 interface Props {
