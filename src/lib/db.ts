@@ -63,9 +63,10 @@ const DEFAULT_DOMAINS = [
 export function initDB(): void {
   const raw = localStorage.getItem(DB_KEY);
   if (raw) {
-    // Preserve existing data, just sync approved domains
     const parsed = JSON.parse(raw);
     parsed.approvedDomains = [...DEFAULT_DOMAINS];
+    parsed.passes = [];
+    parsed.activityLog = [];
     localStorage.setItem(DB_KEY, JSON.stringify(parsed));
   } else {
     localStorage.setItem(DB_KEY, JSON.stringify({
