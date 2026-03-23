@@ -1,7 +1,5 @@
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { getTimeRemaining, type StaffPass } from "@/lib/db";
+import { type StaffPass } from "@/lib/db";
 import logo from "@/assets/mad-monkey-logo.png";
 
 interface Props {
@@ -10,16 +8,9 @@ interface Props {
 }
 
 export default function DigitalPass({ pass, onReset }: Props) {
-  const [timeLeft, setTimeLeft] = useState(getTimeRemaining(pass));
   const date = new Date(pass.dateIssued);
   const dateStr = date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeLeft(getTimeRemaining(pass));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [pass]);
+  const isExpired = new Date(pass.expiresAt) < new Date();
 
   return (
     <div className="flex min-h-screen items-center justify-center px-5 py-10 bg-primary">
@@ -56,7 +47,7 @@ export default function DigitalPass({ pass, onReset }: Props) {
           <h2 className="font-display text-2xl font-black uppercase mb-1">{pass.fullName}</h2>
           <p className="text-muted-foreground text-sm mb-6">{pass.email}</p>
 
-          {timeLeft.expired ? (
+          {isExpired ? (
             <motion.div
               className="bg-destructive/10 border-2 border-destructive text-destructive py-4 px-5 rounded-lg text-lg font-black mb-6"
               initial={{ scale: 0.8, opacity: 0 }}
@@ -75,13 +66,10 @@ export default function DigitalPass({ pass, onReset }: Props) {
             </motion.div>
           )}
 
-          {/* Countdown timer */}
-          <div className={`rounded-lg p-3 mb-4 text-center ${timeLeft.expired ? "bg-destructive/10" : "bg-accent"}`}>
-            <p className="text-xs text-muted-foreground mb-1">TIME REMAINING</p>
-            <p className={`font-mono text-2xl font-bold tracking-wider ${timeLeft.expired ? "text-destructive" : ""}`}>
-              {timeLeft.expired
-                ? "00:00:00"
-                : `${String(timeLeft.hours).padStart(2, "0")}:${String(timeLeft.minutes).padStart(2, "0")}:${String(timeLeft.seconds).padStart(2, "0")}`}
+          {/* Valid for 1 year badge */}
+          <div className={`rounded-lg p-3 mb-4 text-center ${isExpired ? "bg-destructive/10" : "bg-accent"}`}>
+            <p className={`font-bold text-sm ${isExpired ? "text-destructive" : ""}`}>
+              {isExpired ? "EXPIRED" : "✓ VALID FOR 1 YEAR"}
             </p>
           </div>
 
@@ -91,12 +79,10 @@ export default function DigitalPass({ pass, onReset }: Props) {
           </div>
 
           <p className="text-xs text-muted-foreground">
-            Issued: {dateStr} · Expires: {new Date(pass.expiresAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+            Issued: {dateStr}
             <br />Valid at all Mad Monkey locations worldwide
           </p>
         </motion.div>
-
-
       </motion.div>
     </div>
   );
