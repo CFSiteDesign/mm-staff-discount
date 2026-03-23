@@ -114,7 +114,12 @@ export default function AdminDashboard({ onLogout }: Props) {
             <img src={logo} alt="Mad Monkey" className="h-8 invert" />
             <h1 className="font-display text-xl font-black text-secondary-foreground tracking-tight">ADMIN</h1>
           </div>
-          <Button variant="outline" size="sm" onClick={handleLogout} className="bg-card">Logout</Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={loadData} className="bg-card" disabled={loading}>
+              <RefreshCw className={`h-4 w-4 mr-1 ${loading ? "animate-spin" : ""}`} />Refresh
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleLogout} className="bg-card">Logout</Button>
+          </div>
         </motion.div>
 
         {/* Stats */}
