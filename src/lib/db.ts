@@ -38,7 +38,27 @@ export interface AppDatabase {
 }
 
 const DB_KEY = 'madMonkeyData';
-const DEFAULT_DOMAINS = ["madmonkeyhostels.com", "bnvc.com", "exs.com", "thursday.com"];
+const DEFAULT_DOMAINS = [
+  "madmonkeyhostels.com",
+  "thesnowleague.com",
+  "lapee.dk",
+  "gigpig.uk",
+  "plots.events",
+  "hustlesasa.com",
+  "soundboks.com",
+  "222.place",
+  "xceed.me",
+  "unhurd.co.uk",
+  "getthursday.com",
+  "lex.lgbt",
+  "woov.com",
+  "togather.com",
+  "flickplay.co",
+  "tourhero.com",
+  "realtainment.group",
+  "p-o-o-l.xyz",
+  "theup.co",
+];
 
 export function initDB(): void {
   if (!localStorage.getItem(DB_KEY)) {
