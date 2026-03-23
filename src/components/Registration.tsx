@@ -12,10 +12,9 @@ import logo from "@/assets/mad-monkey-logo.png";
 interface RegistrationProps {
   onPassCreated: (pass: StaffPass) => void;
   onExistingPass: (pass: StaffPass) => void;
-  onAdminClick: () => void;
 }
 
-export default function Registration({ onPassCreated, onExistingPass, onAdminClick }: RegistrationProps) {
+export default function Registration({ onPassCreated, onExistingPass }: RegistrationProps) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [photo, setPhoto] = useState<string | null>(null);
@@ -182,9 +181,9 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
           </CardContent>
         </Card>
         <p className="text-center mt-8">
-          <button onClick={onAdminClick} className="text-primary-foreground/70 text-xs hover:text-primary-foreground transition-colors">
+          <a href="/admin" className="text-primary-foreground/70 text-xs hover:text-primary-foreground transition-colors">
             Admin Login
-          </button>
+          </a>
         </p>
       </motion.div>
     </div>

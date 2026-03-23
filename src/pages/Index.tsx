@@ -2,11 +2,9 @@ import { useState, useCallback } from "react";
 import Registration from "@/components/Registration";
 import VerificationAnimation from "@/components/VerificationAnimation";
 import DigitalPass from "@/components/DigitalPass";
-import AdminLogin from "@/components/AdminLogin";
-import AdminDashboard from "@/components/AdminDashboard";
 import type { StaffPass } from "@/lib/db";
 
-type View = "register" | "verify" | "pass" | "admin-login" | "admin-dash";
+type View = "register" | "verify" | "pass";
 
 export default function Index() {
   const [view, setView] = useState<View>("register");
@@ -31,19 +29,13 @@ export default function Index() {
     setView("register");
   };
 
-  const handleAdminLogin = () => {
-    setView("admin-dash");
-  };
-
   return (
     <>
       {view === "register" && (
-        <Registration onPassCreated={handlePassCreated} onExistingPass={handleExistingPass} onAdminClick={() => setView("admin-login")} />
+        <Registration onPassCreated={handlePassCreated} onExistingPass={handleExistingPass} />
       )}
       {view === "verify" && <VerificationAnimation onComplete={handleVerifyComplete} />}
       {view === "pass" && currentPass && <DigitalPass pass={currentPass} onReset={handleReset} />}
-      {view === "admin-login" && <AdminLogin onLogin={handleAdminLogin} onBack={handleReset} />}
-      {view === "admin-dash" && <AdminDashboard onLogout={handleReset} />}
     </>
   );
 }
