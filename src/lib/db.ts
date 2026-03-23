@@ -1,13 +1,22 @@
+import { supabase } from "@/integrations/supabase/client";
+
 export interface StaffPass {
   id: string;
   fullName: string;
   email: string;
   photo: string;
+  photoUrl?: string;
   code: string;
   dateIssued: string;
   expiresAt: string;
   status: 'active' | 'revoked';
   revokeReason: string | null;
+}
+
+export interface ActivityLogEntry {
+  timestamp: string;
+  action: string;
+  details: string;
 }
 
 export function isPassExpired(pass: StaffPass): boolean {
@@ -25,19 +34,6 @@ export function getTimeRemaining(pass: StaffPass): { hours: number; minutes: num
   };
 }
 
-export interface ActivityLogEntry {
-  timestamp: string;
-  action: string;
-  details: string;
-}
-
-export interface AppDatabase {
-  passes: StaffPass[];
-  approvedDomains: string[];
-  activityLog: ActivityLogEntry[];
-}
-
-const DB_KEY = 'madMonkeyData';
 const DEFAULT_DOMAINS = [
   "madmonkeyhostels.com",
   "thesnowleague.com",
@@ -60,46 +56,95 @@ const DEFAULT_DOMAINS = [
   "theup.co",
 ];
 
-export function initDB(): void {
-  const raw = localStorage.getItem(DB_KEY);
-  if (raw) {
-    const parsed = JSON.parse(raw);
-    parsed.approvedDomains = [...DEFAULT_DOMAINS];
-    parsed.passes = [];
-    parsed.activityLog = [];
-    localStorage.setItem(DB_KEY, JSON.stringify(parsed));
-  } else {
-    localStorage.setItem(DB_KEY, JSON.stringify({
-      passes: [],
-      approvedDomains: DEFAULT_DOMAINS,
-      activityLog: [],
-    }));
-  }
-}
-
-export function getDB(): AppDatabase {
-  const raw = localStorage.getItem(DB_KEY);
+// Approved domains still kept in localStorage (simple config, not user data)
+export function getApprovedDomains(): string[] {
+  const raw = localStorage.getItem("mm_approvedDomains");
   if (!raw) {
-    initDB();
-    return JSON.parse(localStorage.getItem(DB_KEY)!);
+    localStorage.setItem("mm_approvedDomains", JSON.stringify(DEFAULT_DOMAINS));
+    return [...DEFAULT_DOMAINS];
   }
   const parsed = JSON.parse(raw);
-  return {
-    passes: Array.isArray(parsed.passes) ? parsed.passes : [],
-    approvedDomains: Array.isArray(parsed.approvedDomains) ? parsed.approvedDomains : DEFAULT_DOMAINS,
-    activityLog: Array.isArray(parsed.activityLog) ? parsed.activityLog : [],
-  };
+  return Array.isArray(parsed) ? parsed : [...DEFAULT_DOMAINS];
 }
 
-export function saveDB(data: AppDatabase): void {
-  localStorage.setItem(DB_KEY, JSON.stringify(data));
+export function saveApprovedDomains(domains: string[]): void {
+  localStorage.setItem("mm_approvedDomains", JSON.stringify(domains));
 }
 
-export function logActivity(action: string, details: string): void {
-  const db = getDB();
-  db.activityLog.unshift({ timestamp: new Date().toISOString(), action, details });
-  if (db.activityLog.length > 100) db.activityLog.pop();
-  saveDB(db);
+// Database operations for passes
+export async function fetchPasses(): Promise<StaffPass[]> {
+  const { data, error } = await supabase
+    .from("staff_passes")
+    .select("*")
+    .order("date_issued", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching passes:", error);
+    return [];
+  }
+
+  return (data || []).map(row => ({
+    id: row.id,
+    fullName: row.full_name,
+    email: row.email,
+    photo: row.photo || "",
+    photoUrl: row.photo_url || "",
+    code: row.code,
+    dateIssued: row.date_issued,
+    expiresAt: row.expires_at,
+    status: row.status as 'active' | 'revoked',
+    revokeReason: row.revoke_reason,
+  }));
 }
 
-initDB();
+export async function insertPass(pass: StaffPass, photoUrl?: string): Promise<void> {
+  const { error } = await supabase.from("staff_passes").insert({
+    id: pass.id,
+    full_name: pass.fullName,
+    email: pass.email,
+    photo: pass.photo,
+    photo_url: photoUrl || null,
+    code: pass.code,
+    date_issued: pass.dateIssued,
+    expires_at: pass.expiresAt,
+    status: pass.status,
+    revoke_reason: pass.revokeReason,
+  });
+  if (error) console.error("Error inserting pass:", error);
+}
+
+export async function updatePassStatus(id: string, status: 'active' | 'revoked', revokeReason: string | null): Promise<void> {
+  const { error } = await supabase
+    .from("staff_passes")
+    .update({ status, revoke_reason: revokeReason })
+    .eq("id", id);
+  if (error) console.error("Error updating pass:", error);
+}
+
+// Database operations for activity log
+export async function fetchActivityLog(): Promise<ActivityLogEntry[]> {
+  const { data, error } = await supabase
+    .from("activity_log")
+    .select("*")
+    .order("timestamp", { ascending: false })
+    .limit(100);
+
+  if (error) {
+    console.error("Error fetching activity log:", error);
+    return [];
+  }
+
+  return (data || []).map(row => ({
+    timestamp: row.timestamp,
+    action: row.action,
+    details: row.details,
+  }));
+}
+
+export async function logActivity(action: string, details: string): Promise<void> {
+  const { error } = await supabase.from("activity_log").insert({
+    action,
+    details,
+  });
+  if (error) console.error("Error logging activity:", error);
+}

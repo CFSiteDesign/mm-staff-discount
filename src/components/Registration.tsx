@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { getDB, saveDB, logActivity, isPassExpired, type StaffPass } from "@/lib/db";
+import { getApprovedDomains, insertPass, logActivity, isPassExpired, fetchPasses, type StaffPass } from "@/lib/db";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/mad-monkey-logo.png";
 
@@ -21,6 +21,7 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
   const [photo, setPhoto] = useState<string | null>(null);
   const [emailError, setEmailError] = useState("");
   const [photoError, setPhotoError] = useState("");
+  const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,15 +45,20 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
     if (!photo) { setPhotoError("A photo of your face is required"); return; }
 
     const domain = email.toLowerCase().split("@")[1];
-    const db = getDB();
+    const approvedDomains = getApprovedDomains();
 
-    if (!db.approvedDomains.includes(domain)) {
+    if (!approvedDomains.includes(domain)) {
       setEmailError("This email domain is not authorised.");
       return;
     }
 
-    const existing = db.passes.find(p => p.email === email.toLowerCase() && p.status === "active" && !isPassExpired(p));
+    setLoading(true);
+
+    // Check for existing active pass in database
+    const passes = await fetchPasses();
+    const existing = passes.find(p => p.email === email.toLowerCase() && p.status === "active" && !isPassExpired(p));
     if (existing) {
+      setLoading(false);
       onExistingPass(existing);
       return;
     }
@@ -64,7 +70,7 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
 
     const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
 
-    // Upload photo to storage and get public URL
+    // Upload photo to storage
     let photoUrl = "";
     try {
       const base64Data = photo.split(",")[1];
@@ -89,6 +95,7 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
       fullName,
       email: email.toLowerCase(),
       photo,
+      photoUrl,
       code,
       dateIssued: new Date().toISOString(),
       expiresAt,
@@ -96,15 +103,15 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
       revokeReason: null,
     };
 
-    db.passes.push(newPass);
-    saveDB(db);
-    logActivity("pass_issued", `Pass issued to ${fullName} (${email})`);
+    await insertPass(newPass, photoUrl);
+    await logActivity("pass_issued", `Pass issued to ${fullName} (${email})`);
 
-    // Send notification email with public photo URL
+    // Send notification email
     supabase.functions.invoke('send-pass-email', {
       body: { fullName, email: email.toLowerCase(), code, expiresAt, photo: photoUrl },
     }).catch(err => console.error('Email send failed:', err));
 
+    setLoading(false);
     onPassCreated(newPass);
   };
 
@@ -128,7 +135,6 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
           <CardContent className="pt-6">
             <h2 className="font-display text-xl font-bold text-center mb-5">Staff Discount Pass</h2>
             <form onSubmit={handleSubmit}>
-              {/* Photo upload */}
               <p className="text-center text-sm text-muted-foreground mb-2">Please upload a clear photo of your face</p>
               <motion.div
                 className="flex flex-col items-center mb-5"
@@ -168,7 +174,9 @@ export default function Registration({ onPassCreated, onExistingPass, onAdminCli
                   <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="name@madmonkeyhostels.com" required />
                   {emailError && <p className="text-destructive text-xs mt-1">{emailError}</p>}
                 </div>
-                <Button type="submit" className="w-full" size="lg">Verify & Generate Pass</Button>
+                <Button type="submit" className="w-full" size="lg" disabled={loading}>
+                  {loading ? "Creating Pass..." : "Verify & Generate Pass"}
+                </Button>
               </motion.div>
             </form>
           </CardContent>
