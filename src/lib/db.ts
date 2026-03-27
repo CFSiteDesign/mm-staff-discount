@@ -54,6 +54,7 @@ const DEFAULT_DOMAINS = [
   "realtainment.group",
   "p-o-o-l.xyz",
   "theup.co",
+  "bestnights.vc",
 ];
 
 // Approved domains still kept in localStorage (simple config, not user data)
