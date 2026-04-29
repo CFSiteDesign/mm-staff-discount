@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { getApprovedDomains, insertPass, logActivity, isPassExpired, fetchPasses, type StaffPass } from "@/lib/db";
+import { getApprovedDomains, getApprovedCreatorEmails, insertPass, logActivity, isPassExpired, fetchPasses, type StaffPass } from "@/lib/db";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/mad-monkey-logo.png";
 
@@ -43,11 +43,16 @@ export default function Registration({ onPassCreated, onExistingPass }: Registra
 
     if (!photo) { setPhotoError("A photo of your face is required"); return; }
 
-    const domain = email.toLowerCase().split("@")[1];
+    const lowerEmail = email.toLowerCase();
+    const domain = lowerEmail.split("@")[1];
     const approvedDomains = getApprovedDomains();
+    const approvedCreatorEmails = getApprovedCreatorEmails();
 
-    if (!approvedDomains.includes(domain)) {
-      setEmailError("This email domain is not authorised.");
+    const domainOk = approvedDomains.includes(domain);
+    const creatorOk = approvedCreatorEmails.includes(lowerEmail);
+
+    if (!domainOk && !creatorOk) {
+      setEmailError("This email is not authorised.");
       return;
     }
 
