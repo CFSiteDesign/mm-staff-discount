@@ -72,6 +72,90 @@ export function saveApprovedDomains(domains: string[]): void {
   localStorage.setItem("mm_approvedDomains", JSON.stringify(domains));
 }
 
+// Approved individual creator emails (synced from server)
+export function getApprovedCreatorEmails(): string[] {
+  const raw = localStorage.getItem("mm_approvedCreatorEmails");
+  if (!raw) {
+    localStorage.setItem("mm_approvedCreatorEmails", JSON.stringify([]));
+    return [];
+  }
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.map((e: string) => e.toLowerCase()) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveApprovedCreatorEmails(emails: string[]): void {
+  const normalized = Array.from(new Set(emails.map(e => e.toLowerCase())));
+  localStorage.setItem("mm_approvedCreatorEmails", JSON.stringify(normalized));
+}
+
+export interface CreatorEmail {
+  id: string;
+  email: string;
+  fullName: string | null;
+  creatorId: string | null;
+  source: string;
+  isActive: boolean;
+  syncedAt: string;
+}
+
+export async function fetchCreatorEmails(): Promise<CreatorEmail[]> {
+  const { data, error } = await supabase
+    .from("approved_creator_emails")
+    .select("*")
+    .order("synced_at", { ascending: false });
+  if (error) {
+    console.error("Error fetching creator emails:", error);
+    return [];
+  }
+  return (data || []).map(row => ({
+    id: row.id,
+    email: row.email,
+    fullName: row.full_name,
+    creatorId: row.creator_id,
+    source: row.source,
+    isActive: row.is_active,
+    syncedAt: row.synced_at,
+  }));
+}
+
+export async function syncCreatorEmailsToLocalStorage(): Promise<void> {
+  const { data, error } = await supabase
+    .from("approved_creator_emails")
+    .select("email")
+    .eq("is_active", true);
+  if (error) {
+    console.error("Error syncing creator emails:", error);
+    return;
+  }
+  const emails = (data || []).map(r => r.email.toLowerCase());
+  saveApprovedCreatorEmails(emails);
+}
+
+export async function setCreatorActive(id: string, isActive: boolean): Promise<void> {
+  const { error } = await supabase
+    .from("approved_creator_emails")
+    .update({ is_active: isActive })
+    .eq("id", id);
+  if (error) console.error("Error updating creator:", error);
+}
+
+export async function addCreatorEmail(email: string, fullName?: string): Promise<void> {
+  const { error } = await supabase
+    .from("approved_creator_emails")
+    .upsert({
+      email: email.toLowerCase(),
+      full_name: fullName || null,
+      source: 'manual',
+      is_active: true,
+      synced_at: new Date().toISOString(),
+    }, { onConflict: 'email' });
+  if (error) console.error("Error adding creator:", error);
+}
+
 // Database operations for passes
 export async function fetchPasses(): Promise<StaffPass[]> {
   const { data, error } = await supabase

@@ -4,10 +4,13 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import {
   fetchPasses, fetchActivityLog, updatePassStatus, logActivity,
   isPassExpired, getApprovedDomains, saveApprovedDomains,
-  type StaffPass, type ActivityLogEntry
+  fetchCreatorEmails, setCreatorActive, addCreatorEmail, syncCreatorEmailsToLocalStorage,
+  type StaffPass, type ActivityLogEntry, type CreatorEmail
 } from "@/lib/db";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/mad-monkey-logo.png";
@@ -24,12 +27,17 @@ export default function AdminDashboard({ onLogout }: Props) {
   const [activityLog, setActivityLog] = useState<ActivityLogEntry[]>([]);
   const [approvedDomains, setApprovedDomains] = useState<string[]>(getApprovedDomains());
   const [loading, setLoading] = useState(true);
+  const [creators, setCreators] = useState<CreatorEmail[]>([]);
+  const [newCreatorEmail, setNewCreatorEmail] = useState("");
+  const [newCreatorName, setNewCreatorName] = useState("");
 
   const loadData = async () => {
     setLoading(true);
-    const [p, a] = await Promise.all([fetchPasses(), fetchActivityLog()]);
+    const [p, a, c] = await Promise.all([fetchPasses(), fetchActivityLog(), fetchCreatorEmails()]);
     setPasses(p);
     setActivityLog(a);
+    setCreators(c);
+    await syncCreatorEmailsToLocalStorage();
     setLoading(false);
   };
 
@@ -85,6 +93,26 @@ export default function AdminDashboard({ onLogout }: Props) {
     saveApprovedDomains(updated);
     setApprovedDomains(updated);
     logActivity("domain_removed", `Domain @${domain} removed from whitelist.`);
+  };
+
+  const toggleCreator = async (creator: CreatorEmail) => {
+    const next = !creator.isActive;
+    await setCreatorActive(creator.id, next);
+    await logActivity(
+      next ? "creator_activated" : "creator_deactivated",
+      `Creator ${creator.email} ${next ? "activated" : "deactivated"}.`
+    );
+    await loadData();
+  };
+
+  const handleAddCreator = async () => {
+    const email = newCreatorEmail.trim().toLowerCase();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return;
+    await addCreatorEmail(email, newCreatorName.trim() || undefined);
+    await logActivity("creator_added_manual", `Creator ${email} added manually.`);
+    setNewCreatorEmail("");
+    setNewCreatorName("");
+    await loadData();
   };
 
   const handleLogout = () => {
@@ -143,60 +171,113 @@ export default function AdminDashboard({ onLogout }: Props) {
           {/* Table */}
           <motion.div variants={itemVariants} className="flex-[2] min-w-0">
             <Card className="shadow-card overflow-hidden">
-              <div className="p-4 border-b flex items-center justify-between gap-3">
-                <h3 className="font-display font-bold">Pass Registry</h3>
-                <Input className="max-w-[200px]" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} />
-              </div>
-              {loading ? (
-                <div className="p-6 text-center text-muted-foreground">Loading...</div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="bg-accent">
-                        <th className="text-left p-3 font-semibold">Name</th>
-                        <th className="text-left p-3 font-semibold hidden sm:table-cell">Email</th>
-                        <th className="text-left p-3 font-semibold">Code</th>
-                        <th className="text-left p-3 font-semibold">Status</th>
-                        <th className="text-left p-3 font-semibold">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filtered.map(p => (
-                        <tr key={p.id} className="border-b last:border-0 hover:bg-accent/50 transition-colors">
-                          <td className="p-3">
-                            <div className="flex items-center gap-2">
-                              {p.photo && <img src={p.photo} className="w-7 h-7 rounded-full object-cover" alt="" />}
-                              <span className={p.status === "revoked" ? "line-through text-destructive" : ""}>{p.fullName}</span>
-                            </div>
-                          </td>
-                          <td className="p-3 hidden sm:table-cell text-muted-foreground">{p.email}</td>
-                          <td className="p-3 font-mono text-xs">{p.code}</td>
-                          <td className="p-3">
-                            {p.status === "revoked" ? (
-                              <span className="text-destructive font-bold line-through">REVOKED</span>
-                            ) : isPassExpired(p) ? (
-                              <span className="text-muted-foreground font-bold">EXPIRED</span>
-                            ) : (
-                              <span className="text-success font-bold">ACTIVE</span>
-                            )}
-                          </td>
-                          <td className="p-3">
-                            {p.status === "active" ? (
-                              <Button size="sm" variant="destructive" className="text-xs h-7 px-2" onClick={() => toggleStatus(p.id, "revoked")}>Revoke</Button>
-                            ) : (
-                              <Button size="sm" variant="outline" className="text-xs h-7 px-2" onClick={() => toggleStatus(p.id, "active")}>Reactivate</Button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                      {filtered.length === 0 && (
-                        <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">No passes found</td></tr>
-                      )}
-                    </tbody>
-                  </table>
+              <Tabs defaultValue="passes" className="w-full">
+                <div className="p-4 border-b flex items-center justify-between gap-3 flex-wrap">
+                  <TabsList>
+                    <TabsTrigger value="passes">Passes</TabsTrigger>
+                    <TabsTrigger value="creators">Creators ({creators.length})</TabsTrigger>
+                  </TabsList>
+                  <Input className="max-w-[200px]" placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} />
                 </div>
-              )}
+
+                <TabsContent value="passes" className="m-0">
+                  {loading ? (
+                    <div className="p-6 text-center text-muted-foreground">Loading...</div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="bg-accent">
+                            <th className="text-left p-3 font-semibold">Name</th>
+                            <th className="text-left p-3 font-semibold hidden sm:table-cell">Email</th>
+                            <th className="text-left p-3 font-semibold">Code</th>
+                            <th className="text-left p-3 font-semibold">Status</th>
+                            <th className="text-left p-3 font-semibold">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filtered.map(p => (
+                            <tr key={p.id} className="border-b last:border-0 hover:bg-accent/50 transition-colors">
+                              <td className="p-3">
+                                <div className="flex items-center gap-2">
+                                  {p.photo && <img src={p.photo} className="w-7 h-7 rounded-full object-cover" alt="" />}
+                                  <span className={p.status === "revoked" ? "line-through text-destructive" : ""}>{p.fullName}</span>
+                                </div>
+                              </td>
+                              <td className="p-3 hidden sm:table-cell text-muted-foreground">{p.email}</td>
+                              <td className="p-3 font-mono text-xs">{p.code}</td>
+                              <td className="p-3">
+                                {p.status === "revoked" ? (
+                                  <span className="text-destructive font-bold line-through">REVOKED</span>
+                                ) : isPassExpired(p) ? (
+                                  <span className="text-muted-foreground font-bold">EXPIRED</span>
+                                ) : (
+                                  <span className="text-success font-bold">ACTIVE</span>
+                                )}
+                              </td>
+                              <td className="p-3">
+                                {p.status === "active" ? (
+                                  <Button size="sm" variant="destructive" className="text-xs h-7 px-2" onClick={() => toggleStatus(p.id, "revoked")}>Revoke</Button>
+                                ) : (
+                                  <Button size="sm" variant="outline" className="text-xs h-7 px-2" onClick={() => toggleStatus(p.id, "active")}>Reactivate</Button>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                          {filtered.length === 0 && (
+                            <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">No passes found</td></tr>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="creators" className="m-0">
+                  <div className="p-4 border-b bg-accent/30 space-y-2">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Add creator manually</p>
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <Input placeholder="Email" value={newCreatorEmail} onChange={e => setNewCreatorEmail(e.target.value)} />
+                      <Input placeholder="Full name (optional)" value={newCreatorName} onChange={e => setNewCreatorName(e.target.value)} />
+                      <Button size="sm" onClick={handleAddCreator}>Add</Button>
+                    </div>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-accent">
+                          <th className="text-left p-3 font-semibold">Name</th>
+                          <th className="text-left p-3 font-semibold">Email</th>
+                          <th className="text-left p-3 font-semibold hidden sm:table-cell">Synced</th>
+                          <th className="text-left p-3 font-semibold">Active</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {creators
+                          .filter(c => c.email.toLowerCase().includes(search.toLowerCase()) || (c.fullName || "").toLowerCase().includes(search.toLowerCase()))
+                          .map(c => (
+                          <tr key={c.id} className="border-b last:border-0 hover:bg-accent/50 transition-colors">
+                            <td className="p-3">
+                              <span className={c.isActive ? "" : "line-through text-muted-foreground"}>
+                                {c.fullName || <span className="text-muted-foreground italic">—</span>}
+                              </span>
+                              <div className="text-[10px] uppercase text-muted-foreground tracking-wide">{c.source}</div>
+                            </td>
+                            <td className="p-3 text-muted-foreground">{c.email}</td>
+                            <td className="p-3 hidden sm:table-cell text-muted-foreground text-xs">{new Date(c.syncedAt).toLocaleDateString()}</td>
+                            <td className="p-3">
+                              <Switch checked={c.isActive} onCheckedChange={() => toggleCreator(c)} />
+                            </td>
+                          </tr>
+                        ))}
+                        {creators.length === 0 && (
+                          <tr><td colSpan={4} className="p-6 text-center text-muted-foreground">No creators synced yet</td></tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </Card>
           </motion.div>
 
