@@ -35,6 +35,39 @@ export type Database = {
         }
         Relationships: []
       }
+      approved_creator_emails: {
+        Row: {
+          created_at: string
+          creator_id: string | null
+          email: string
+          full_name: string | null
+          id: string
+          is_active: boolean
+          source: string
+          synced_at: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id?: string | null
+          email: string
+          full_name?: string | null
+          id?: string
+          is_active?: boolean
+          source?: string
+          synced_at?: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string | null
+          email?: string
+          full_name?: string | null
+          id?: string
+          is_active?: boolean
+          source?: string
+          synced_at?: string
+        }
+        Relationships: []
+      }
       staff_passes: {
         Row: {
           code: string
