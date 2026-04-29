@@ -86,6 +86,19 @@ export default function DigitalPass({ pass, onReset }: Props) {
             <br />Valid at all Mad Monkey locations worldwide
           </p>
         </motion.div>
+
+        <motion.div
+          className="bg-card/90 border border-border rounded-lg p-4 text-center mb-4"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1, duration: 0.4 }}
+        >
+          <p className="text-sm font-semibold mb-1">📧 We've also emailed you a copy of your pass</p>
+          <p className="text-xs text-muted-foreground">
+            Please check your inbox — and your <strong>junk / spam folder</strong> — for an email from
+            <span className="whitespace-nowrap"> madmonkey@verify.theorox.com</span>.
+          </p>
+        </motion.div>
       </motion.div>
     </div>
   );
