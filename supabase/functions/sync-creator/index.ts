@@ -63,67 +63,10 @@ serve(async (req) => {
       details: `Creator ${fullName || email} synced from Creator Hub`,
     });
 
-    // Issue a pass automatically and email it (only for newly-added creators
-    // to avoid spamming on every resync)
-    let passCreated = false;
-    if (!existing && fullName) {
-      // Check if the creator already has an active pass in staff_passes
-      const { data: existingPass } = await supabase
-        .from('staff_passes')
-        .select('id, status, expires_at')
-        .eq('email', email)
-        .eq('status', 'active')
-        .maybeSingle();
-
-      const stillValid = existingPass && new Date(existingPass.expires_at).getTime() > Date.now();
-
-      if (!stillValid) {
-        const firstName = fullName.split(' ')[0].toUpperCase().replace(/[^A-Z]/g, '');
-        const domainClean = (email.split('@')[1] || 'CREATOR').split('.')[0].toUpperCase().replace(/[^A-Z]/g, '');
-        const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
-        const code = `${firstName}-${domainClean}-${rand}`;
-        const expiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString();
-        const id = Date.now().toString();
-
-        const { error: passError } = await supabase.from('staff_passes').insert({
-          id,
-          full_name: fullName,
-          email,
-          photo: null,
-          photo_url: null,
-          code,
-          date_issued: new Date().toISOString(),
-          expires_at: expiresAt,
-          status: 'active',
-          revoke_reason: null,
-        });
-
-        if (!passError) {
-          passCreated = true;
-          await supabase.from('activity_log').insert({
-            action: 'pass_issued',
-            details: `Pass auto-issued to creator ${fullName} (${email})`,
-          });
-
-          // Fire approval email (same template as registered users)
-          try {
-            await supabase.functions.invoke('send-pass-email', {
-              body: { fullName, email, code, expiresAt, photo: '' },
-            });
-          } catch (err) {
-            console.error('Failed to send creator approval email:', err);
-          }
-        } else {
-          console.error('Failed to create pass for creator:', passError);
-        }
-      }
-    }
-
     return new Response(JSON.stringify({
       success: true,
       email,
       created: !existing,
-      pass_issued: passCreated,
     }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
