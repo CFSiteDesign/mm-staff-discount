@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import Registration from "@/components/Registration";
 import VerificationAnimation from "@/components/VerificationAnimation";
-import DigitalPass from "@/components/DigitalPass";
+import CheckEmail from "@/components/CheckEmail";
 import type { StaffPass } from "@/lib/db";
 
 type View = "register" | "verify" | "pass";
@@ -24,18 +24,13 @@ export default function Index() {
     setView("pass");
   };
 
-  const handleReset = () => {
-    setCurrentPass(null);
-    setView("register");
-  };
-
   return (
     <>
       {view === "register" && (
         <Registration onPassCreated={handlePassCreated} onExistingPass={handleExistingPass} />
       )}
       {view === "verify" && <VerificationAnimation onComplete={handleVerifyComplete} />}
-      {view === "pass" && currentPass && <DigitalPass pass={currentPass} onReset={handleReset} />}
+      {view === "pass" && currentPass && <CheckEmail email={currentPass.email} />}
     </>
   );
 }
