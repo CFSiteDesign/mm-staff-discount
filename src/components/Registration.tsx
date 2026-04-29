@@ -62,6 +62,17 @@ export default function Registration({ onPassCreated, onExistingPass }: Registra
     const passes = await fetchPasses();
     const existing = passes.find(p => p.email === email.toLowerCase() && p.status === "active" && !isPassExpired(p));
     if (existing) {
+      // Re-send the pass email every time, even for existing passes
+      supabase.functions.invoke('send-pass-email', {
+        body: {
+          fullName: existing.fullName,
+          email: existing.email,
+          code: existing.code,
+          expiresAt: existing.expiresAt,
+          photo: existing.photoUrl || existing.photo,
+        },
+      }).catch(err => console.error('Email resend failed:', err));
+      await logActivity("pass_resent", `Pass email re-sent to ${existing.fullName} (${existing.email})`);
       setLoading(false);
       onExistingPass(existing);
       return;
